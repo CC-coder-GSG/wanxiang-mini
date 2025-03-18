@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    tools:context=".softwore_register">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#6200EE"
+        android:fitsSystemWindows="true"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="注册码创建"
+        app:titleTextColor="@color/white" />
+
+    <EditText
+        android:id="@+id/number"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="请输入需要创建注册码的数量"
+        android:inputType="number"
+        android:digits="123456789"
+        android:maxLength="1"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <Button
+        android:id="@+id/data"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="截止日期选择"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/number" />
+
+    <TextView
+        android:id="@+id/textView_datauntil"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="截止日期待选择"
+        android:textSize="18sp"
+        android:typeface="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/data" />
+
+    <EditText
+        android:id="@+id/remark"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="输入备注（非必填）"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_datauntil" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/remark">
+
+
+        <RadioButton
+            android:id="@+id/radioButton1"
+            android:text="一天"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/radioButton3"
+            android:text="三天"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RadioButton
+            android:id="@+id/radioButton7"
+            android:text="七天"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RadioButton
+            android:id="@+id/radioButton30"
+            android:text="一个月"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/radioButton60"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="两个月" />
+
+        <RadioButton
+            android:id="@+id/radioButton180"
+            android:text="半年"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RadioButton
+            android:id="@+id/radioButton365"
+            android:text="一年"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"/>
+        <RadioButton
+            android:id="@+id/radioButton_forever"
+            android:text="永久"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/button_new"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="生成新注册码"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="国际码"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_new" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

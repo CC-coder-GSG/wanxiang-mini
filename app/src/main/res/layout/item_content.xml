@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textViewBatchNo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textViewCreationTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewExpirationDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewOperatorId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewPassWord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewRedeemableDays"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewRemark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewSalesMan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textViewState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/button_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="生成二维码"/>
+
+</LinearLayout>

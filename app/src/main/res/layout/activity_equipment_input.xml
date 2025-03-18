@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    tools:context=".equipment_input">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#6200EE"
+        android:fitsSystemWindows="true"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="设备录入"
+        app:titleTextColor="@color/white" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="设备ID(SN)"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="选择经销商"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText" />
+
+    <EditText
+        android:id="@+id/editText2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="备注"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText1" />
+
+    <EditText
+        android:id="@+id/editText3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="配套时长"
+        android:inputType="number"
+        android:digits="123456789"
+        android:maxLength="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText2" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText3">
+
+        <RadioButton
+            android:id="@+id/radioButton_active"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="激活" />
+
+        <RadioButton
+            android:id="@+id/radioButton_inactive"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="未激活" />
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/button_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="录入"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup2" />
+
+    <TextView
+        android:id="@+id/text_jingxiaoshang_0"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="设备将会被录入到此经销商名下："
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_input" />
+
+    <TextView
+        android:id="@+id/text_jingxiaoshang"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_jingxiaoshang_0" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -391,3 +391,72 @@ public interface function_given{
     )
     fun function_given(@Body function_information: function_information , @Header("Authorization") auth : String) : Call<function_given_back>
 }
+
+public interface trial{
+    @PUT("/gateway/dr/deviceRegInfo/trialOne")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "Connection: keep-alive",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "sec-ch-ua-mobile:?0",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "Accept: application/json, text/plain, */*",
+        "Sec-Fetch-Site: same-origin",
+        "Content-Type: application/json;charset=UTF-8",
+        "userId: ",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Dest: empty",
+        "Origin: https://cloud.sinognss.com",
+        "Referer: https://cloud.sinognss.com/drFrontEnd/",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+    )
+    fun trial_given(@Query("sn")sn: String, @Query("day")day : Int, @Header("Authorization")auth : String) : Call<Trial_back>
+}
+
+public interface tiral_updata{
+    @PUT("/gateway/dr/deviceRegInfo/updateTrialDay")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "Connection: keep-alive",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "sec-ch-ua-mobile:?0",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "Accept: application/json, text/plain, */*",
+        "Sec-Fetch-Site: same-origin",
+        "Content-Type: application/json;charset=UTF-8",
+        "userId: ",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Dest: empty",
+        "Origin: https://cloud.sinognss.com",
+        "Referer: https://cloud.sinognss.com/drFrontEnd/",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+    )
+    fun trial_updata(@Query("sn")sn: String, @Query("day")day : Int, @Header("Authorization")auth : String) : Call<Trial_back>
+}
+
+public interface tempRegDeadline_f{
+    @PUT("/gateway/dr/deviceRegInfo/updateRegInfoById")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "Connection: keep-alive",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "sec-ch-ua-mobile:?0",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "Accept: application/json, text/plain, */*",
+        "Sec-Fetch-Site: same-origin",
+        "Content-Type: application/json;charset=UTF-8",
+        "userId: ",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Dest: empty",
+        "Origin: https://cloud.sinognss.com",
+        "Referer: https://cloud.sinognss.com/drFrontEnd/",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+    )
+    fun tempRegDeadline_send(@Body tempRegDeadlined: tempRegDeadline_send, @Header("Authorization")auth : String) : Call<Trial_back>
+}

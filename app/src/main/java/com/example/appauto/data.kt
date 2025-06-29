@@ -122,7 +122,7 @@ data class Record(
     val remark: Any,
     val sn: String,
     val tempRegCode: Any,
-    val tempRegCodeExpireTime: Any,
+    val tempRegCodeExpireTime: String,
     val tempRegCodeHave: Any,
     val tempRegDeadline: String,
     val tempRegMaxDuration: Any,
@@ -408,6 +408,20 @@ data class function_given_back(
 )
 
 class Data_functionback
+
+//试用返回
+data class Trial_back(
+    val code: Int,
+    val `data`: Data,
+    val message: String
+)
+
+//修改截止日期的发送值
+data class tempRegDeadline_send(
+    val isUpdateAll: Boolean,
+    val snList: List<String>,
+    val tempRegDeadline: String
+)
 
 
 

@@ -1,7 +1,12 @@
 package com.example.appauto
 
+import android.content.Context
 import android.os.Bundle
+import android.text.InputFilter
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -11,14 +16,28 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.CompositeDateValidator
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.gson.GsonBuilder
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class RegisterSystem : AppCompatActivity() {
+
+    var data_until: String? = null
+    var SN : String? = null
+    var auth: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,24 +47,60 @@ class RegisterSystem : AppCompatActivity() {
         val button_out = findViewById<Button>(R.id.button_out)
         val button_permanentRegCode = findViewById<Button>(R.id.button_permanentRegCode)
         val button_funtion = findViewById<Button>(R.id.button_funtion)
+        val button_trial = findViewById<Button>(R.id.button_trial)
+        val trial_editTextText = findViewById<EditText>(R.id.trial_editTextText)
+        val trial_correct = findViewById<Button>(R.id.trial_correct)
+        val button_tempRegDeadline = findViewById<Button>(R.id.button_tempRegDeadline)
+
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         setSupportActionBar(toolbar)
         toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
         toolbar.setNavigationOnClickListener {
             finish()
         }
+
+        // 新增：设置输入过滤器（限制非负整数）
+        trial_editTextText.filters = arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
+            // 过滤非数字字符（处理复制粘贴场景）
+            val filtered = source.filter { it.isDigit() }
+            // 检查输入是否为有效非负整数（允许 0 和正整数）
+            if (filtered.isEmpty()) {
+                null // 允许删除操作（返回空表示不修改原输入）
+            } else {
+                // 禁止前导零（例如 "012" 会被过滤为 "12"）
+                val currentText = dest.toString()
+                val newText =
+                    currentText.substring(0, dstart) + filtered + currentText.substring(dend)
+                if (newText.startsWith("0") && newText.length > 1) {
+                    // 若输入以 0 开头且长度大于 1，只保留最后输入的数字（例如输入 "0" 后再输入 "1"，结果为 "1"）
+                    filtered.takeLast(1)
+                } else {
+                    filtered // 正常输入数字
+                }
+            }
+        })
+
         //取出intent传递的值
         //判断各个功能按钮的显示
-        val SN = intent.getStringExtra("SN")
+        SN = intent.getStringExtra("SN")
         val tempRegDeadline = intent.getStringExtra("tempRegDeadline")
-        val auth = intent.getStringExtra("auth")
+        auth = intent.getStringExtra("auth")
         val offHostNetTime = intent.getStringExtra("offHostNetTime")
         val offNtripTime = intent.getStringExtra("offNtripTime")
         val lastUpdateTime = intent.getStringExtra("lastUpdateTime")
         val isHostNet = intent.getBooleanExtra("isHostNet", false)
         val isNtrip = intent.getBooleanExtra("isNtrip", false)
-        if (tempRegDeadline != null) {
+        val trialDay = intent.getIntExtra("trialDay", 0)
+        val todayCanTrial = intent.getBooleanExtra("todayCanTrial", false)
+        val tempRegCodeExpireTime = intent.getStringExtra("tempRegCodeExpireTime")
+
+        //过期时间如果不是空的则说明已经出库，隐藏出库、试用相关功能
+        if (tempRegCodeExpireTime != null) {
             button_out.visibility = Button.GONE
+            trial_editTextText.visibility = EditText.GONE
+            trial_correct.visibility = Button.GONE
+            button_trial.visibility = Button.GONE
         }
         //永久码下发按钮显示
         val permanentRegCodeHave = intent.getBooleanExtra("permanentRegCodeHave", false)
@@ -73,7 +128,7 @@ class RegisterSystem : AppCompatActivity() {
                     Toast.makeText(applicationContext, "SN异常，请检查或重试", Toast.LENGTH_SHORT)
                         .show()
                 } else {
-                    retrofit_out.out(SN, auth.toString())
+                    retrofit_out.out(SN.toString(), auth.toString())
                         .enqueue(object : retrofit2.Callback<out_back> {
                             override fun onResponse(p0: Call<out_back>, p1: Response<out_back>) {
                                 button_out.visibility = Button.GONE
@@ -117,7 +172,7 @@ class RegisterSystem : AppCompatActivity() {
                     Toast.makeText(applicationContext, "SN异常，请检查或重试", Toast.LENGTH_SHORT)
                         .show()
                 } else {
-                    retrofit_permanent.permanent_code(SN, auth.toString())
+                    retrofit_permanent.permanent_code(SN.toString(), auth.toString())
                         .enqueue(object : retrofit2.Callback<permanent_code_back> {
                             override fun onResponse(
                                 p0: Call<permanent_code_back>,
@@ -181,16 +236,18 @@ class RegisterSystem : AppCompatActivity() {
             }
             builder.setView(view)
 
-                // 设置“确定”按钮
-                builder.setPositiveButton("确定") { dialog, which ->
-                    val isSwitch1Checked = switch1.isChecked
-                    val isSwitch2Checked = switch2.isChecked
+            // 设置“确定”按钮
+            builder.setPositiveButton("确定") { dialog, which ->
+                val isSwitch1Checked = switch1.isChecked
+                val isSwitch2Checked = switch2.isChecked
 
-                    val gson = GsonBuilder().serializeNulls().create()
-                    val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/").addConverterFactory(GsonConverterFactory.create(gson)).build()
-                    val retrofit_function = retrofit.create(function_given::class.java)
+                val gson = GsonBuilder().serializeNulls().create()
+                val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/")
+                    .addConverterFactory(GsonConverterFactory.create(gson)).build()
+                val retrofit_function = retrofit.create(function_given::class.java)
 
-                    retrofit_function.function_given(function_information(
+                retrofit_function.function_given(
+                    function_information(
                         HostNetDeadlineTimeEditable = true,
                         NtripDeadlineTimeEditable = true,
                         companyId = "",
@@ -206,35 +263,200 @@ class RegisterSystem : AppCompatActivity() {
                         snList = listOf(SN.toString()),
                         trialStatus = null,
                         type = 2
-                    ), auth.toString()).enqueue(object : Callback<function_given_back>{
-                        override fun onResponse(
-                            p0: Call<function_given_back>,
-                            p1: Response<function_given_back>
-                        ) {
-                            if(p1.isSuccessful){
-                                Toast.makeText(applicationContext, p1.body()?.message, Toast.LENGTH_SHORT).show()
-                            }
-                            else{ Toast.makeText(applicationContext, "修改失败，尝试重新登陆罗网或重新查询设备", Toast.LENGTH_SHORT).show()}
-                        }
-
-                        override fun onFailure(p0: Call<function_given_back>, p1: Throwable) {
+                    ), auth.toString()
+                ).enqueue(object : Callback<function_given_back> {
+                    override fun onResponse(
+                        p0: Call<function_given_back>,
+                        p1: Response<function_given_back>
+                    ) {
+                        if (p1.isSuccessful) {
                             Toast.makeText(
                                 applicationContext,
-                                "功能授权时网络连接失败",
+                                p1.body()?.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                applicationContext,
+                                "修改失败，尝试重新登陆罗网或重新查询设备",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                    }
 
+                    override fun onFailure(p0: Call<function_given_back>, p1: Throwable) {
+                        Toast.makeText(
+                            applicationContext,
+                            "功能授权时网络连接失败",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                })
+            }
+
+            // 设置“取消”按钮
+            builder.setNegativeButton("取消") { dialog, which ->
+                dialog.dismiss()
+            }
+
+            val dialog = builder.create()
+            dialog.show()
+        }
+
+        //试用按钮点击事件
+        button_trial.setOnClickListener {
+            val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/")
+                .addConverterFactory(GsonConverterFactory.create()).build()
+            val retrofit_trial = retrofit.create(trial::class.java)
+            retrofit_trial.trial_given(SN.toString(), 1, auth.toString())
+                .enqueue(object : Callback<Trial_back> {
+                    override fun onResponse(p0: Call<Trial_back>, p1: Response<Trial_back>) {
+                        if (p1.isSuccessful) {
+                            Toast.makeText(
+                                applicationContext,
+                                p1.body()?.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(applicationContext, "试用失败", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+
+                    override fun onFailure(p0: Call<Trial_back>, p1: Throwable) {
+                        Toast.makeText(
+                            applicationContext,
+                            "试用时网络连接失败",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                })
+        }
+
+        //修改试用天数系列
+        trial_correct.setOnClickListener {
+            if (trial_editTextText.text.toString() != "")
+            {
+                val day = trial_editTextText.text.toString().toInt()
+                val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/")
+                    .addConverterFactory(GsonConverterFactory.create()).build()
+                val retrofit_trial = retrofit.create(tiral_updata::class.java)
+                retrofit_trial.trial_updata(SN.toString(), day, auth.toString())
+                    .enqueue(object : Callback<Trial_back> {
+                        override fun onResponse(p0: Call<Trial_back>, p1: Response<Trial_back>) {
+                            if (p1.isSuccessful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    p1.body()?.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "修改试用时间失败",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        override fun onFailure(p0: Call<Trial_back>, p1: Throwable) {
+                            Toast.makeText(
+                                applicationContext,
+                                "修改试用时间时网络连接失败",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     })
+                // 隐藏虚拟键盘
+                inputMethodManager.hideSoftInputFromWindow(it.windowToken, 0)
                 }
+            else{
+                Toast.makeText(applicationContext, "试用天数不能输入空值", Toast.LENGTH_SHORT).show()
+            }
+            }
 
-                // 设置“取消”按钮
-                builder.setNegativeButton("取消") { dialog, which ->
-                    dialog.dismiss()
-                }
+        //修改注册截至时间点击时间
+        button_tempRegDeadline.setOnClickListener {
+            showDatePicker()
+        }
+    }
 
-                val dialog = builder.create()
-                dialog.show()
+        private fun showDatePicker() {
+            val calendarConstraintsBuilder = CalendarConstraints.Builder()
+            val today = MaterialDatePicker.todayInUtcMilliseconds()
+
+            // 计算两年前的今天
+            val twoYearsAgo = today - TimeUnit.DAYS.toMillis(365 * 2)
+            // 计算三年后的今天
+            val threeYearsFromToday = today + TimeUnit.DAYS.toMillis(365 * 3)
+
+            // 设置日期范围，从两年前的今天到三年后的今天
+            calendarConstraintsBuilder.setStart(twoYearsAgo)
+            calendarConstraintsBuilder.setEnd(threeYearsFromToday)
+
+            // 设置初始打开时显示的日期为今天
+            calendarConstraintsBuilder.setOpenAt(today)
+
+            // 使用 CompositeDateValidator 组合日期验证器
+            val validators = listOf(
+                DateValidatorPointForward.from(twoYearsAgo),
+                DateValidatorPointBackward.before(threeYearsFromToday)
+            )
+            val dateValidator = CompositeDateValidator.allOf(validators)
+            calendarConstraintsBuilder.setValidator(dateValidator)
+
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("选择日期")
+                .setSelection(today)
+                .setCalendarConstraints(calendarConstraintsBuilder.build())
+                .build()
+
+            datePicker.show(supportFragmentManager, "datePicker")
+
+            datePicker.addOnPositiveButtonClickListener { selection ->
+            // 将选择的日期转换为 Date 对象
+            val selectedDate = Date(selection)
+            // 创建 SimpleDateFormat 对象，指定日期格式
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            // 使用 SimpleDateFormat 格式化日期
+            val formattedDate = dateFormat.format(selectedDate).toString()
+            // 执行其他操作
+            data_until = formattedDate
+            //执行网络请求
+                val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/")
+                    .addConverterFactory(GsonConverterFactory.create()).build()
+                val retrofit_tempRegDeadline = retrofit.create(tempRegDeadline_f::class.java)
+                retrofit_tempRegDeadline.tempRegDeadline_send(
+                    tempRegDeadline_send(
+                        false,
+                        listOf(SN.toString()), data_until.toString()
+                    ), auth.toString()
+                ).enqueue(object : Callback<Trial_back> {
+                    override fun onResponse(p0: Call<Trial_back>, p1: Response<Trial_back>) {
+                        if (p1.isSuccessful) {
+                            Toast.makeText(
+                                applicationContext,
+                                p1.body()?.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                applicationContext,
+                                "修改截至时间失败",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onFailure(p0: Call<Trial_back>, p1: Throwable) {
+                        Toast.makeText(
+                            applicationContext,
+                            "修改截至时间时网络连接失败",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
             }
         }
     }

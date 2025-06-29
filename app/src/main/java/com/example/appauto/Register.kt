@@ -48,6 +48,9 @@ class Register : AppCompatActivity() {
     private var isHostNet : Boolean? = false
     private var isNtrip : Boolean? = false
     private var lastUpdateTime : String? = null
+    private var trialDay : Int? = 0
+    private var todayCanTrial : Boolean? = false
+    private var tempRegCodeExpireTime : String? = null
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -664,15 +667,15 @@ class Register : AppCompatActivity() {
                                         val productionType = record.productionType
                                         val remark = record.remark
                                         val tempRegCode = record.tempRegCode
-                                        val tempRegCodeExpireTime = record.tempRegCodeExpireTime
+                                        tempRegCodeExpireTime = record.tempRegCodeExpireTime
                                         val tempRegDeadline = record.tempRegDeadline
                                         val tempRegCodeHave = record.tempRegCodeHave
                                         val tempRegDeadline_final = record.tempRegDeadline
                                         val tempRegMaxDuration = record.tempRegMaxDuration
-                                        val todayCanTrial = record.todayCanTrial
+                                        todayCanTrial = record.todayCanTrial
                                         val trialCode = record.trialCode
                                         val trialCodeHave = record.trialCodeHave
-                                        val trialDay = record.trialDay
+                                        trialDay = record.trialDay
                                         val trialStatus = record.trialStatus
                                         var trialStatus_word = "试用结束"
                                         if(trialStatus == "TRIALING"){trialStatus_word = "试用中"}
@@ -717,6 +720,9 @@ class Register : AppCompatActivity() {
             intent.putExtra("isHostNet", isHostNet)
             intent.putExtra("isNtrip", isNtrip)
             intent.putExtra("lastUpdateTime", lastUpdateTime)
+            intent.putExtra("trialDay", trialDay)
+            intent.putExtra("todayCanTrial", todayCanTrial)
+            intent.putExtra("tempRegCodeExpireTime", tempRegCodeExpireTime)
             startActivity(intent)
         }
 

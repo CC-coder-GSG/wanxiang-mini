@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.appauto"
+    android:orientation="vertical">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INPUT_METHODS" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/icons192"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.APPAuto"
+        tools:targetApi="31">
+        <activity
+            android:name=".RegisterSystem"
+            android:exported="false" />
+        <activity
+            android:name=".equipment_input"
+            android:exported="false" />
+        <activity
+            android:name=".newsoftware"
+            android:exported="false" />
+        <activity
+            android:name=".softwore_register"
+            android:exported="false" />
+        <activity
+            android:name=".kuaqu_correct"
+            android:exported="false" />
+        <activity
+            android:name=".log_register"
+            android:exported="false" />
+        <activity
+            android:name=".Register"
+            android:exported="false" />
+        <activity
+            android:name=".lwaccount"
+            android:exported="false" />
+        <activity
+            android:name=".kuaqu"
+            android:exported="false" />
+        <activity
+            android:name=".CareThing"
+            android:exported="false" />
+        <activity
+            android:name=".Label"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ListviewActivity"
+            android:exported="true" />
+        <activity
+            android:name=".WebActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Taojian_List"
+            android:exported="false" />
+        <activity
+            android:name=".SecondActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.appauto.ACTION_START" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FirstActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="#6200EE"
+        app:title="迷你万象"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    </androidx.appcompat.widget.Toolbar>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="手簿SIM卡号查询"
+        />
+
+    <Button
+        android:id="@+id/button_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="产品状态清单"
+        />
+
+    <Button
+        android:id="@+id/button_scaner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="产品型号对应-标签/型批"
+        />
+
+    <Button
+        android:id="@+id/button_taojian"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="套件清单-套装"
+        />
+
+    <Button
+        android:id="@+id/button_kq"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="录入设备 基站策略 跨区"
+        />
+
+    <Button
+        android:id="@+id/button_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="接收机注册"
+        />
+
+    <Button
+        android:id="@+id/button_software_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="软件注册码"
+        />
+
+</LinearLayout>

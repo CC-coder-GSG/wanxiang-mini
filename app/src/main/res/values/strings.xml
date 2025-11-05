@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">迷你万象</string>
+
+    <string-array name="spinner_basestation">
+        <item>随区域</item>
+        <item>SinoGNSS</item>
+        <item>中国移动</item>
+        <item>千寻</item>
+        <item>SinoGNSS -> 中国移动</item>
+        <item>SinoGNSS -> 中国移动 -> 千寻</item>
+        <item>SinoGNSS -> 千寻</item>
+        <item>SinoGNSS -> 千寻 -> 中国移动</item>
+        <item>中国移动 -> SinoGNSS -> 千寻</item>
+        <item>中国移动 -> SinoGNSS</item>
+        <item>中国移动 -> 千寻 -> SinoGNSS</item>
+        <item>中国移动 -> 千寻</item>
+        <item>千寻 -> 中国移动 -> SinoGNSS</item>
+        <item>千寻 -> 中国移动</item>
+        <item>千寻 -> SinoGNSS -> 中国移动</item>
+        <item>千寻 -> SinoGNSS</item>
+    </string-array>
+
+</resources>

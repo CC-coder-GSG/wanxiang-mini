@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="#6200EE"
+        app:title="提示"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:layout_gravity="center"
+        android:id="@+id/bz_txt"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_width="350dp"
+        android:layout_height="match_parent"
+        android:textSize="20sp"
+        android:singleLine="false"
+        android:ellipsize="none"
+        android:maxLines="5"
+        android:inputType="textMultiLine"
+        android:hint="SN号规则：\n产品系列代号+第一位数字+板卡模块代号+功能代号+预留位+流水号\n例如：L51L02598(注意定制主机用客户产品系列代号)\nK803系列模块代号为1；
+\n功能代号规则：\n主机带数传功能，标识位使用数传标识，其中Lora版本为L，传统电台为U，华信电台为H；\n若不带数传，带惯导功能，标识位为0；\n若不带数传，且不带惯导，标识位为N；
+\n流水号0001-2000为研发号段使用，其他顺延\n另海外版本铭牌标贴带惯导功能的主机打IMU，不带惯导功能的不打其他标识
+\nT300 Plus和T30换U70模块的暂时先T31U9开始，待海外宣传后改回原规则" />
+
+
+</LinearLayout>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    tools:context=".RegisterSystem">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#6200EE"
+        android:fitsSystemWindows="true"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="注册系统"
+        app:titleTextColor="@color/white" />
+
+    <Button
+        android:id="@+id/button_out"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="出库"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <Button
+        android:id="@+id/button_trial"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="试用"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_out" />
+
+    <Button
+        android:id="@+id/button_tempRegDeadline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="修改注册截止时间"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_trial" />
+
+    <Button
+        android:id="@+id/button_permanentRegCode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="下发永久码"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_tempRegDeadline" />
+
+    <Button
+        android:id="@+id/button_funtion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="功能授权"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_permanentRegCode" />
+
+    <Button
+        android:id="@+id/trial_correct"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="修改"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/trial_editTextText"
+        app:layout_constraintTop_toBottomOf="@+id/button_funtion" />
+
+    <EditText
+        android:id="@+id/trial_editTextText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:ems="10"
+        android:inputType="number"
+        android:hint="输入试用修改次数"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_funtion" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

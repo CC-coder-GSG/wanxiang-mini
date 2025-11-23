@@ -3,6 +3,7 @@ package com.example.appauto
 import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,8 +30,11 @@ class SecondActivity : AppCompatActivity() {
         val toolbar1 = findViewById<Toolbar>(R.id.toolbar1)
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         setSupportActionBar(toolbar1)
-        toolbar1.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar1.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar1.navigationIcon?.setTint(Color.WHITE)
+        toolbar1.overflowIcon?.setTint(Color.WHITE)
+        toolbar1.setNavigationOnClickListener {
             finish()
         }
 

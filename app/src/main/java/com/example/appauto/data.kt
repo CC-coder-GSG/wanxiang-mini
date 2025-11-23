@@ -1,5 +1,7 @@
 package com.example.appauto
 
+import com.google.gson.annotations.SerializedName
+
 
 data class logindata(
     val code: Int,
@@ -260,7 +262,7 @@ data class Sort(
 )
 
 //软件注册码post请求，返回json格式数据
-data class software_post_return(
+/*data class software_post_return(
     val code: Int,
     val `data`: Data_software,
     val message: String
@@ -306,7 +308,7 @@ data class SortX(
     val empty: Boolean,
     val sorted: Boolean,
     val unsorted: Boolean
-)
+)*/
 
 //生成注册码的post请求json格式数据
 data class software_code(
@@ -423,6 +425,159 @@ data class tempRegDeadline_send(
     val tempRegDeadline: String
 )
 
+//新的生成软件注册码接口
+data class new_software_code_get(
+    val cn: Boolean,
+    val companyId: Any?,
+    val expirationDate: String,
+    val functions: List<Function>,
+    val genNum: Int,
+    val isDomestic: Int,
+    val isExport: Boolean,
+    val remark: String,
+    val salesMan: String
+)
 
+data class Function(
+    val id: Int,
+    val regDays: Int
+)
 
+//新的生成软件注册码接口返回值
+data class software_post_return(
+    val code: Int,
+    val `data`: Data_software_post_return,
+    val message: String
+)
 
+data class Data_software_post_return(
+    val content: List<Content>,
+    val empty: Boolean,
+    val first: Boolean,
+    val last: Boolean,
+    val number: Int,
+    val numberOfElements: Int,
+    val pageable: Pageable,
+    val size: Int,
+    val sort: SortX,
+    val totalElements: Int,
+    val totalPages: Int
+)
+
+data class Content(
+    val batchNo: String,
+    val creationTime: String,
+    val expirationDate: String,
+    val id: String,
+    val operatorId: String,
+    val passWord: String,
+    val redeemableDays: Int,
+    val remark: String,
+    val salesMan: String,
+    val state: String,
+    @SerializedName("function")
+    val functions: List<Function_software_post_return>? = null
+)
+
+data class Pageable(
+    val offset: Int,
+    val pageNumber: Int,
+    val pageSize: Int,
+    val paged: Boolean,
+    val sort: SortX,
+    val unpaged: Boolean
+)
+
+data class SortX(
+    val empty: Boolean,
+    val sorted: Boolean,
+    val unsorted: Boolean
+)
+
+data class Function_software_post_return(
+    val enable: Boolean,
+    val id: String,
+    val regDays: Int
+) {
+    val idInt: Int? get() = id.toIntOrNull()
+}
+
+//获取账号接口，发送json
+data class AccountOfCorsGet(
+    val conditions: Conditions,
+    val current: Int?,
+    val keyword: String?,
+    val size: Int?
+)
+
+data class Conditions(
+    val accountStatus: String?,
+    val accountType: String?,
+    val activeStatus: String?,
+    val instanceId: String?
+)
+
+//获取账号接口，返回值json
+data class CorsInformation(
+    val code: Int,
+    val `data`: DataCors,
+    val message: String,
+    val type: Int
+)
+
+data class DataCors(
+    val current: Int,
+    val hitCount: Boolean,
+    val optimizeCountSql: Boolean,
+    val orders: List<Any>?,
+    val pages: Int,
+    val records: List<RecordCors>,
+    val searchCount: Boolean,
+    val size: Int,
+    val total: Int
+)
+
+data class RecordCors(
+    val accountStatus: Int,
+    val accountType: Int,
+    val activeStatus: Int,
+    val activeTime: Long,
+    val activeType: Int,
+    val expiredate: Long,
+    val id: Int,
+    val instanceId: Any?,
+    val lastActiveTime: Any?,
+    val name: String,
+    val password: String,
+    val registerdate: Long,
+    val remark: Any?
+)
+
+//查询差分账号密码的请求数据
+data class PasswordCheck(
+    val id: String
+)
+
+//查询差分账号密码的返回数据
+data class Password(
+    val code: Int,
+    val `data`: String,
+    val message: String,
+    val type: Int
+)
+
+//重置密码的请求数据->跟查询差分账号密码的请求数据一样
+//重置密码的返回数据
+data class PasswordReset(
+    val code: Int,
+    val `data`: String,
+    val message: String?,
+    val type: Int
+)
+
+//自定义密码请求数据
+data class PasswordCustom(
+    val id: Int,
+    val password: String
+)
+//自定义密码返回数据->跟重置密码的返回数据一样

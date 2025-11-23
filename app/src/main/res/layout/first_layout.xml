@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F6F7FB">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -11,58 +12,246 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:background="#6200EE"
+        android:background="#111827"
+        android:elevation="4dp"
         app:title="迷你万象"
-        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-    </androidx.appcompat.widget.Toolbar>
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@android:color/white" />
 
-    <Button
-        android:id="@+id/button1"
+    <!-- 可滚动内容区域，避免小屏挤压 -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="手簿SIM卡号查询"
-        />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
-    <Button
-        android:id="@+id/button_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="产品状态清单"
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="20dp">
 
-    <Button
-        android:id="@+id/button_scaner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="产品型号对应-标签/型批"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="手簿SIM卡号查询"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_sim_search"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
 
-    <Button
-        android:id="@+id/button_taojian"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="套件清单-套装"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="产品状态清单"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_status_list"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
 
-    <Button
-        android:id="@+id/button_kq"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="录入设备 基站策略 跨区"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_scaner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="产品型号对应-标签/型批"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_model_scan"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
 
-    <Button
-        android:id="@+id/button_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="接收机注册"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_taojian"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="套件清单-套装"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_kit_bundle"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
 
-    <Button
-        android:id="@+id/button_software_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="软件注册码"
-        />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_kq"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="录入设备 基站策略 跨区"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_cross_region"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_register"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="接收机注册"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_receiver_register"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_software_register"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="软件注册码"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_software_key"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_account_cors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:minHeight="56dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:text="账号管理"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:backgroundTint="@android:color/white"
+                android:elevation="2dp"
+                app:cornerRadius="14dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_account_manage"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="20dp"
+                app:iconTint="#111827" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

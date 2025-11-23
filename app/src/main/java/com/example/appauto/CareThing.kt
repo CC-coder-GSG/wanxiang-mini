@@ -1,5 +1,6 @@
 package com.example.appauto
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -12,11 +13,16 @@ class CareThing : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_care_thing)
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
             finish()
         }
     }

@@ -3,6 +3,7 @@ package com.example.appauto
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -36,6 +37,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import androidx.core.view.WindowCompat
+import android.content.DialogInterface
+import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
+import android.view.WindowManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlin.math.min
 
 class Register : AppCompatActivity() {
     private lateinit var dbHelper: DBManager
@@ -57,6 +66,11 @@ class Register : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
 
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val text = findViewById<TextView>(R.id.editText_register)
         val text1 = findViewById<TextView>(R.id.textView)
@@ -73,10 +87,14 @@ class Register : AppCompatActivity() {
         button_register_system.visibility = Button.GONE
 
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
             finish()
         }
+
         val button_register = findViewById<Button>(R.id.button_register)
         // 初始化 Spinner
         val spinner = findViewById<Spinner>(R.id.spinner)
@@ -98,14 +116,11 @@ class Register : AppCompatActivity() {
             }
         }
         button_register.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
-            //设置对话框标题
+            val builder = MaterialAlertDialogBuilder(this)
             builder.setTitle("提示")
-            //设置对话框消息
             builder.setMessage("确定要生成注册码吗？")
-            //设置“确定”按钮
             builder.setPositiveButton("确定") { dialog, which ->
-                //定制sql语句
+                // ===== 以下业务逻辑保持你原来的代码不变 =====
                 val SN = text.text
 
                 if (SN.isNullOrBlank()) {
@@ -116,12 +131,8 @@ class Register : AppCompatActivity() {
                         .addConverterFactory(GsonConverterFactory.create(gson))
                         .build()
 
-                    //获取access_token
                     val sql = "select * from luowang where user=\"345\""
                     val dataresult = db.rawQuery(sql, null)
-                    //SN信息插入数据库
-                    //操作时间写入数据库
-                    //系统时间距离截止日期超过 N 天
                     val nowtime_1_h = LocalDateTime.now()
                     val formatter_utc_h =
                         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -135,16 +146,12 @@ class Register : AppCompatActivity() {
                             dataresult.getString(dataresult.getColumnIndexOrThrow("accesstoken"))
                         auth = "bearer $access_token"
                         dataresult.close()
-                        //db.close()
-                        //dbHelper.closeDatabase()
 
                         val Registerinfo = retrofit.create(register_sendinto::class.java)
                         val orderItems = OrderItem(false, "create_time")
                         val list_orderItems = mutableListOf(orderItems)
                         val register_send1 =
                             register_send(SN.toString(), list_orderItems, "", null, 1, 10)
-
-                        //text1.text = gsonRece
 
                         Registerinfo.register_info(register_send1, auth.toString())
                             .enqueue(object : Callback<registerinfo> {
@@ -153,6 +160,7 @@ class Register : AppCompatActivity() {
                                     call: Call<registerinfo>,
                                     response: Response<registerinfo>
                                 ) {
+                                    // ===== 这里开始到你原来 onResponse 结束，完全不动 =====
                                     if (response.isSuccessful) {
                                         val registerInfo = response.body()
                                         if (registerInfo != null) {
@@ -162,455 +170,260 @@ class Register : AppCompatActivity() {
                                                 if (records.isNotEmpty()) {
                                                     val record_num = records.size
                                                     if (!(record_num > 1)) {
-                                                        // 现在你可以遍历 records 列表并读取其中的值
                                                         for (record in records) {
-                                                            // 读取 record 对象的属性
                                                             val sn = record.sn
                                                             val companyName = record.companyName
                                                             val createTime = record.createTime
-                                                            val productionType =
-                                                                record.productionType
-                                                            val tempRegDeadline =
-                                                                record.tempRegDeadline
+                                                            val productionType = record.productionType
+                                                            val tempRegDeadline = record.tempRegDeadline
                                                             if (tempRegDeadline != null) {
-                                                                // 将 tempRegDeadline 字符串转换为日期格式
-                                                                val dateFormat =
-                                                                    SimpleDateFormat("yyyy-MM-dd")
-                                                                val deadlineDate: Date? =
-                                                                    dateFormat.parse(tempRegDeadline)
-                                                                // 获取当前系统时间
+                                                                val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+                                                                val deadlineDate: Date? = dateFormat.parse(tempRegDeadline)
                                                                 val currentTime = Date()
-                                                                // 确保 deadlineDate 不为 null，否则使用当前时间
-                                                                val deadlineTime =
-                                                                    deadlineDate?.getTime()
-                                                                        ?: currentTime.getTime()
-                                                                // 计算截止日期与当前日期的天数差
-                                                                val diffInDays =
-                                                                    TimeUnit.DAYS.convert(
-                                                                        deadlineTime - currentTime.getTime(),
-                                                                        TimeUnit.MILLISECONDS
-                                                                    )
-                                                                // 比较 deadlineDate 和 currentTime
+                                                                val deadlineTime = deadlineDate?.time ?: currentTime.time
+                                                                val diffInDays = TimeUnit.DAYS.convert(
+                                                                    deadlineTime - currentTime.time,
+                                                                    TimeUnit.MILLISECONDS
+                                                                )
                                                                 if (diffInDays > entend_num + 1) {
-                                                                    // 系统时间距离截止日期超过 N 天
-                                                                    val nowtime_1 =
-                                                                        LocalDateTime.now()
-                                                                    val code_time =
-                                                                        nowtime_1.plusDays(
-                                                                            entend_num.toLong()
-                                                                        )
-                                                                    val formatter_utc =
-                                                                        DateTimeFormatter.ofPattern(
-                                                                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                                        )
-                                                                    val String_codetime =
-                                                                        code_time.format(
-                                                                            formatter_utc
-                                                                        )
-                                                                    //获取注册码
-                                                                    val retrofit_get_domestic_code =
-                                                                        Retrofit.Builder()
-                                                                            .baseUrl("https://cloud.sinognss.com/")
-                                                                            .addConverterFactory(
-                                                                                GsonConverterFactory.create(
-                                                                                    gson
-                                                                                )
-                                                                            ).build()
-                                                                    val domesticcode =
-                                                                        retrofit_get_domestic_code.create(
-                                                                            register_domestic::class.java
-                                                                        )
-                                                                    domesticcode.register_domestic_send(
-                                                                        domestcode(
-                                                                            sn,
-                                                                            String_codetime,
-                                                                            "DOMESTIC"
-                                                                        ),
-                                                                        auth.toString()
-                                                                    ).enqueue(object :
-                                                                        Callback<domesticinfo> {
-                                                                        override fun onResponse(
-                                                                            p0: Call<domesticinfo>,
-                                                                            p1: Response<domesticinfo>
-                                                                        ) {
-                                                                            val domestic_message =
-                                                                                p1.body()
-                                                                            if (domestic_message != null) {
-                                                                                Toast.makeText(
-                                                                                    applicationContext,
-                                                                                    domestic_message.message,
-                                                                                    Toast.LENGTH_SHORT
-                                                                                ).show()
-                                                                                //注册成功时间信息写入数据库
-                                                                                val sql_register =
-                                                                                    "UPDATE historyregister SET registertime='$String_codetime' WHERE operatetime='$nowtimeString'"
-                                                                                db.execSQL(
-                                                                                    sql_register
-                                                                                )
+                                                                    val nowtime_1 = LocalDateTime.now()
+                                                                    val code_time = nowtime_1.plusDays(entend_num.toLong())
+                                                                    val formatter_utc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                                                                    val String_codetime = code_time.format(formatter_utc)
 
-                                                                                //下发注册码之后获取信息
-                                                                                val retrofit_getfinal_info =
-                                                                                    Retrofit.Builder()
-                                                                                        .baseUrl("https://cloud.sinognss.com/")
-                                                                                        .addConverterFactory(
-                                                                                            GsonConverterFactory.create(
-                                                                                                gson
-                                                                                            )
-                                                                                        ).build()
-                                                                                val finalinfo =
-                                                                                    retrofit_getfinal_info.create(
-                                                                                        finalreceiverinfo::class.java
-                                                                                    )
-                                                                                finalinfo.get_final_receiverinfo(
-                                                                                    sn,
-                                                                                    auth.toString()
-                                                                                ).enqueue(object :
-                                                                                    Callback<finalinfo> {
-                                                                                    override fun onResponse(
-                                                                                        p0: Call<finalinfo>,
-                                                                                        p1: Response<finalinfo>
-                                                                                    ) {
-                                                                                        val info =
-                                                                                            p1.body()
+                                                                    val retrofit_get_domestic_code = Retrofit.Builder()
+                                                                        .baseUrl("https://cloud.sinognss.com/")
+                                                                        .addConverterFactory(GsonConverterFactory.create(gson))
+                                                                        .build()
+                                                                    val domesticcode = retrofit_get_domestic_code.create(register_domestic::class.java)
+                                                                    domesticcode.register_domestic_send(
+                                                                        domestcode(sn, String_codetime, "DOMESTIC"),
+                                                                        auth.toString()
+                                                                    ).enqueue(object : Callback<domesticinfo> {
+                                                                        override fun onResponse(p0: Call<domesticinfo>, p1: Response<domesticinfo>) {
+                                                                            val domestic_message = p1.body()
+                                                                            if (domestic_message != null) {
+                                                                                Toast.makeText(applicationContext, domestic_message.message, Toast.LENGTH_SHORT).show()
+                                                                                val sql_register = "UPDATE historyregister SET registertime='$String_codetime' WHERE operatetime='$nowtimeString'"
+                                                                                db.execSQL(sql_register)
+
+                                                                                val retrofit_getfinal_info = Retrofit.Builder()
+                                                                                    .baseUrl("https://cloud.sinognss.com/")
+                                                                                    .addConverterFactory(GsonConverterFactory.create(gson))
+                                                                                    .build()
+                                                                                val finalinfo = retrofit_getfinal_info.create(finalreceiverinfo::class.java)
+                                                                                finalinfo.get_final_receiverinfo(sn, auth.toString()).enqueue(object : Callback<finalinfo> {
+                                                                                    override fun onResponse(p0: Call<finalinfo>, p1: Response<finalinfo>) {
+                                                                                        val info = p1.body()
                                                                                         if (p1 != null) {
-                                                                                            val campanyname =
-                                                                                                info?.data?.devRegInfo?.companyName
-                                                                                            val createtime =
-                                                                                                info?.data?.devRegInfo?.createTime
-                                                                                            val isHostNet =
-                                                                                                info?.data?.devRegInfo?.isHostNet
-                                                                                            val isNtrip =
-                                                                                                info?.data?.devRegInfo?.isNtrip
-                                                                                            val productionType_final =
-                                                                                                info?.data?.devRegInfo?.productionType
-                                                                                            val sn_final =
-                                                                                                info?.data?.devRegInfo?.sn
-                                                                                            val tempRegCodeExpireTime =
-                                                                                                info?.data?.devRegInfo?.tempRegCodeExpireTime
-                                                                                            val tempRegCodeHave =
-                                                                                                info?.data?.devRegInfo?.tempRegCodeHave
-                                                                                            val tempRegDeadline_final =
-                                                                                                info?.data?.devRegInfo?.tempRegDeadline
-                                                                                            text3.text =
-                                                                                                "SN: $sn_final,\n 经销商: $campanyname,\n 创建时间: $createtime,\n 型号：$productionType_final,\n 注册截止时间：$tempRegDeadline_final,\n 注册码过期时间：$tempRegCodeExpireTime,\n 永久码：$tempRegCodeHave,\n 主机网络：$isHostNet,\n 手簿网络：$isNtrip"
+                                                                                            val campanyname = info?.data?.devRegInfo?.companyName
+                                                                                            val createtime = info?.data?.devRegInfo?.createTime
+                                                                                            val isHostNet = info?.data?.devRegInfo?.isHostNet
+                                                                                            val isNtrip = info?.data?.devRegInfo?.isNtrip
+                                                                                            val productionType_final = info?.data?.devRegInfo?.productionType
+                                                                                            val sn_final = info?.data?.devRegInfo?.sn
+                                                                                            val tempRegCodeExpireTime = info?.data?.devRegInfo?.tempRegCodeExpireTime
+                                                                                            val tempRegCodeHave = info?.data?.devRegInfo?.tempRegCodeHave
+                                                                                            val tempRegDeadline_final = info?.data?.devRegInfo?.tempRegDeadline
+                                                                                            text3.text = "SN: $sn_final,\n 经销商: $campanyname,\n 创建时间: $createtime,\n 型号：$productionType_final,\n 注册截止时间：$tempRegDeadline_final,\n 注册码过期时间：$tempRegCodeExpireTime,\n 永久码：$tempRegCodeHave,\n 主机网络：$isHostNet,\n 手簿网络：$isNtrip"
                                                                                         }
                                                                                     }
-
-                                                                                    override fun onFailure(
-                                                                                        p0: Call<finalinfo>,
-                                                                                        p1: Throwable
-                                                                                    ) {
-                                                                                        Toast.makeText(
-                                                                                            applicationContext,
-                                                                                            "获取信息时连接出现问题",
-                                                                                            Toast.LENGTH_SHORT
-                                                                                        ).show()
+                                                                                    override fun onFailure(p0: Call<finalinfo>, p1: Throwable) {
+                                                                                        Toast.makeText(applicationContext, "获取信息时连接出现问题", Toast.LENGTH_SHORT).show()
                                                                                     }
-
                                                                                 })
-
                                                                             }
                                                                         }
-
-                                                                        override fun onFailure(
-                                                                            p0: Call<domesticinfo>,
-                                                                            p1: Throwable
-                                                                        ) {
-                                                                            Toast.makeText(
-                                                                                applicationContext,
-                                                                                "注册码下发时连接异常",
-                                                                                Toast.LENGTH_SHORT
-                                                                            ).show()
+                                                                        override fun onFailure(p0: Call<domesticinfo>, p1: Throwable) {
+                                                                            Toast.makeText(applicationContext, "注册码下发时连接异常", Toast.LENGTH_SHORT).show()
                                                                         }
-
                                                                     })
-
-
                                                                 } else {
-                                                                    // 系统时间距离截止日期未超过 N 天
                                                                     val nowtime = LocalDate.now()
-                                                                    val nowtime_1 =
-                                                                        LocalDateTime.now()
-                                                                    val extend_time =
-                                                                        nowtime.plusDays((entend_num + 1).toLong())
-                                                                    val code_time =
-                                                                        nowtime_1.plusDays(
-                                                                            entend_num.toLong()
-                                                                        )
-                                                                    // 定义日期格式
-                                                                    val formatter =
-                                                                        DateTimeFormatter.ofPattern(
-                                                                            "yyyy-MM-dd"
-                                                                        )
-                                                                    val formatter_utc =
-                                                                        DateTimeFormatter.ofPattern(
-                                                                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                                                                        )
-                                                                    // 将日期格式化为字符串
-                                                                    val String_extendtime =
-                                                                        extend_time.format(formatter)
-                                                                    val String_codetime =
-                                                                        code_time.format(
-                                                                            formatter_utc
-                                                                        )
-                                                                    // 延长注册时间
-                                                                    val retrofit_extend_time =
-                                                                        Retrofit.Builder()
-                                                                            .baseUrl("https://cloud.sinognss.com/")
-                                                                            .addConverterFactory(
-                                                                                GsonConverterFactory.create(
-                                                                                    gson
-                                                                                )
-                                                                            ).build()
-                                                                    val extend_register_time =
-                                                                        retrofit_extend_time.create(
-                                                                            register_time_extend_put::class.java
-                                                                        )
+                                                                    val nowtime_1 = LocalDateTime.now()
+                                                                    val extend_time = nowtime.plusDays((entend_num + 1).toLong())
+                                                                    val code_time = nowtime_1.plusDays(entend_num.toLong())
+                                                                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                                                    val formatter_utc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                                                                    val String_extendtime = extend_time.format(formatter)
+                                                                    val String_codetime = code_time.format(formatter_utc)
+
+                                                                    val retrofit_extend_time = Retrofit.Builder()
+                                                                        .baseUrl("https://cloud.sinognss.com/")
+                                                                        .addConverterFactory(GsonConverterFactory.create(gson))
+                                                                        .build()
+                                                                    val extend_register_time = retrofit_extend_time.create(register_time_extend_put::class.java)
                                                                     extend_register_time.register_time(
-                                                                        register_time_extend(
-                                                                            false,
-                                                                            listOf(sn),
-                                                                            String_extendtime
-                                                                        ),
+                                                                        register_time_extend(false, listOf(sn), String_extendtime),
                                                                         auth.toString()
-                                                                    ).enqueue(object :
-                                                                        Callback<extend_time_notice> {
-                                                                        override fun onResponse(
-                                                                            call: Call<extend_time_notice>,
-                                                                            response: Response<extend_time_notice>
-                                                                        ) {
+                                                                    ).enqueue(object : Callback<extend_time_notice> {
+                                                                        override fun onResponse(call: Call<extend_time_notice>, response: Response<extend_time_notice>) {
                                                                             if (response.isSuccessful) {
-                                                                                val extend_message =
-                                                                                    response.body()
+                                                                                val extend_message = response.body()
                                                                                 if (extend_message != null) {
-                                                                                    //Toast.makeText(applicationContext, extend_message.message, Toast.LENGTH_SHORT).show()
-                                                                                    //延长注册时间写入数据库
-                                                                                    val sql_extendtime =
-                                                                                        "UPDATE historyregister SET extendtime='$String_codetime' WHERE operatetime='$nowtimeString'"
-                                                                                    db.execSQL(
-                                                                                        sql_extendtime
-                                                                                    )
-                                                                                    //获取注册码
-                                                                                    val retrofit_get_domestic_code =
-                                                                                        Retrofit.Builder()
-                                                                                            .baseUrl(
-                                                                                                "https://cloud.sinognss.com/"
-                                                                                            )
-                                                                                            .addConverterFactory(
-                                                                                                GsonConverterFactory.create(
-                                                                                                    gson
-                                                                                                )
-                                                                                            )
-                                                                                            .build()
-                                                                                    val domesticcode =
-                                                                                        retrofit_get_domestic_code.create(
-                                                                                            register_domestic::class.java
-                                                                                        )
+                                                                                    val sql_extendtime = "UPDATE historyregister SET extendtime='$String_codetime' WHERE operatetime='$nowtimeString'"
+                                                                                    db.execSQL(sql_extendtime)
+
+                                                                                    val retrofit_get_domestic_code = Retrofit.Builder()
+                                                                                        .baseUrl("https://cloud.sinognss.com/")
+                                                                                        .addConverterFactory(GsonConverterFactory.create(gson))
+                                                                                        .build()
+                                                                                    val domesticcode = retrofit_get_domestic_code.create(register_domestic::class.java)
                                                                                     domesticcode.register_domestic_send(
-                                                                                        domestcode(
-                                                                                            sn,
-                                                                                            String_codetime,
-                                                                                            "DOMESTIC"
-                                                                                        ),
+                                                                                        domestcode(sn, String_codetime, "DOMESTIC"),
                                                                                         auth.toString()
-                                                                                    )
-                                                                                        .enqueue(
-                                                                                            object :
-                                                                                                Callback<domesticinfo> {
-                                                                                                override fun onResponse(
-                                                                                                    p0: Call<domesticinfo>,
-                                                                                                    p1: Response<domesticinfo>
-                                                                                                ) {
-                                                                                                    val domestic_message =
-                                                                                                        p1.body()
-                                                                                                    if (domestic_message != null) {
-                                                                                                        Toast.makeText(
-                                                                                                            applicationContext,
-                                                                                                            domestic_message.message,
-                                                                                                            Toast.LENGTH_SHORT
-                                                                                                        )
-                                                                                                            .show()
-                                                                                                        //注册成功时间信息写入数据库
-                                                                                                        val sql_register =
-                                                                                                            "UPDATE historyregister SET registertime='$String_codetime' WHERE operatetime='$nowtimeString'"
-                                                                                                        db.execSQL(
-                                                                                                            sql_register
-                                                                                                        )
-                                                                                                        //下发注册码之后获取信息
-                                                                                                        val retrofit_getfinal_info =
-                                                                                                            Retrofit.Builder()
-                                                                                                                .baseUrl(
-                                                                                                                    "https://cloud.sinognss.com/"
-                                                                                                                )
-                                                                                                                .addConverterFactory(
-                                                                                                                    GsonConverterFactory.create(
-                                                                                                                        gson
-                                                                                                                    )
-                                                                                                                )
-                                                                                                                .build()
-                                                                                                        val finalinfo =
-                                                                                                            retrofit_getfinal_info.create(
-                                                                                                                finalreceiverinfo::class.java
-                                                                                                            )
-                                                                                                        finalinfo.get_final_receiverinfo(
-                                                                                                            sn,
-                                                                                                            auth.toString()
-                                                                                                        )
-                                                                                                            .enqueue(
-                                                                                                                object :
-                                                                                                                    Callback<finalinfo> {
-                                                                                                                    override fun onResponse(
-                                                                                                                        p0: Call<finalinfo>,
-                                                                                                                        p1: Response<finalinfo>
-                                                                                                                    ) {
-                                                                                                                        val info =
-                                                                                                                            p1.body()
-                                                                                                                        if (p1 != null) {
-                                                                                                                            val campanyname =
-                                                                                                                                info?.data?.devRegInfo?.companyName
-                                                                                                                            val createtime =
-                                                                                                                                info?.data?.devRegInfo?.createTime
-                                                                                                                            val isHostNet =
-                                                                                                                                info?.data?.devRegInfo?.isHostNet
-                                                                                                                            val isNtrip =
-                                                                                                                                info?.data?.devRegInfo?.isNtrip
-                                                                                                                            val productionType_final =
-                                                                                                                                info?.data?.devRegInfo?.productionType
-                                                                                                                            val sn_final =
-                                                                                                                                info?.data?.devRegInfo?.sn
-                                                                                                                            val tempRegCodeExpireTime =
-                                                                                                                                info?.data?.devRegInfo?.tempRegCodeExpireTime
-                                                                                                                            val tempRegCodeHave =
-                                                                                                                                info?.data?.devRegInfo?.tempRegCodeHave
-                                                                                                                            val tempRegDeadline_final =
-                                                                                                                                info?.data?.devRegInfo?.tempRegDeadline
-                                                                                                                            text3.text =
-                                                                                                                                "SN: $sn_final,\n 经销商: $campanyname,\n 创建时间: $createtime,\n 型号：$productionType_final,\n 注册截止时间：$tempRegDeadline_final,\n 注册码过期时间：$tempRegCodeExpireTime,\n 永久码：$tempRegCodeHave,\n 主机网络：$isHostNet,\n 手簿网络：$isNtrip"
-                                                                                                                        }
-                                                                                                                    }
+                                                                                    ).enqueue(object : Callback<domesticinfo> {
+                                                                                        override fun onResponse(p0: Call<domesticinfo>, p1: Response<domesticinfo>) {
+                                                                                            val domestic_message = p1.body()
+                                                                                            if (domestic_message != null) {
+                                                                                                Toast.makeText(applicationContext, domestic_message.message, Toast.LENGTH_SHORT).show()
+                                                                                                val sql_register = "UPDATE historyregister SET registertime='$String_codetime' WHERE operatetime='$nowtimeString'"
+                                                                                                db.execSQL(sql_register)
 
-                                                                                                                    override fun onFailure(
-                                                                                                                        p0: Call<finalinfo>,
-                                                                                                                        p1: Throwable
-                                                                                                                    ) {
-                                                                                                                        Toast.makeText(
-                                                                                                                            applicationContext,
-                                                                                                                            "获取信息时连接出现问题",
-                                                                                                                            Toast.LENGTH_SHORT
-                                                                                                                        )
-                                                                                                                            .show()
-                                                                                                                    }
-
-                                                                                                                })
+                                                                                                val retrofit_getfinal_info = Retrofit.Builder()
+                                                                                                    .baseUrl("https://cloud.sinognss.com/")
+                                                                                                    .addConverterFactory(GsonConverterFactory.create(gson))
+                                                                                                    .build()
+                                                                                                val finalinfo = retrofit_getfinal_info.create(finalreceiverinfo::class.java)
+                                                                                                finalinfo.get_final_receiverinfo(sn, auth.toString()).enqueue(object : Callback<finalinfo> {
+                                                                                                    override fun onResponse(p0: Call<finalinfo>, p1: Response<finalinfo>) {
+                                                                                                        val info = p1.body()
+                                                                                                        if (p1 != null) {
+                                                                                                            val campanyname = info?.data?.devRegInfo?.companyName
+                                                                                                            val createtime = info?.data?.devRegInfo?.createTime
+                                                                                                            val isHostNet = info?.data?.devRegInfo?.isHostNet
+                                                                                                            val isNtrip = info?.data?.devRegInfo?.isNtrip
+                                                                                                            val productionType_final = info?.data?.devRegInfo?.productionType
+                                                                                                            val sn_final = info?.data?.devRegInfo?.sn
+                                                                                                            val tempRegCodeExpireTime = info?.data?.devRegInfo?.tempRegCodeExpireTime
+                                                                                                            val tempRegCodeHave = info?.data?.devRegInfo?.tempRegCodeHave
+                                                                                                            val tempRegDeadline_final = info?.data?.devRegInfo?.tempRegDeadline
+                                                                                                            text3.text = "SN: $sn_final,\n 经销商: $campanyname,\n 创建时间: $createtime,\n 型号：$productionType_final,\n 注册截止时间：$tempRegDeadline_final,\n 注册码过期时间：$tempRegCodeExpireTime,\n 永久码：$tempRegCodeHave,\n 主机网络：$isHostNet,\n 手簿网络：$isNtrip"
+                                                                                                        }
                                                                                                     }
-                                                                                                }
-
-                                                                                                override fun onFailure(
-                                                                                                    p0: Call<domesticinfo>,
-                                                                                                    p1: Throwable
-                                                                                                ) {
-                                                                                                    Toast.makeText(
-                                                                                                        applicationContext,
-                                                                                                        "注册码下发时连接异常",
-                                                                                                        Toast.LENGTH_SHORT
-                                                                                                    )
-                                                                                                        .show()
-                                                                                                }
-
-                                                                                            })
+                                                                                                    override fun onFailure(p0: Call<finalinfo>, p1: Throwable) {
+                                                                                                        Toast.makeText(applicationContext, "获取信息时连接出现问题", Toast.LENGTH_SHORT).show()
+                                                                                                    }
+                                                                                                })
+                                                                                            }
+                                                                                        }
+                                                                                        override fun onFailure(p0: Call<domesticinfo>, p1: Throwable) {
+                                                                                            Toast.makeText(applicationContext, "注册码下发时连接异常", Toast.LENGTH_SHORT).show()
+                                                                                        }
+                                                                                    })
                                                                                 } else {
-                                                                                    Toast.makeText(
-                                                                                        applicationContext,
-                                                                                        "延期异常",
-                                                                                        Toast.LENGTH_SHORT
-                                                                                    ).show()
+                                                                                    Toast.makeText(applicationContext, "延期异常", Toast.LENGTH_SHORT).show()
                                                                                 }
                                                                             }
                                                                         }
-
-                                                                        override fun onFailure(
-                                                                            p0: Call<extend_time_notice>,
-                                                                            p1: Throwable
-                                                                        ) {
-                                                                            Toast.makeText(
-                                                                                applicationContext,
-                                                                                "注册延期功能连接失败",
-                                                                                Toast.LENGTH_SHORT
-                                                                            ).show()
+                                                                        override fun onFailure(p0: Call<extend_time_notice>, p1: Throwable) {
+                                                                            Toast.makeText(applicationContext, "注册延期功能连接失败", Toast.LENGTH_SHORT).show()
                                                                         }
                                                                     })
                                                                 }
                                                             } else {
-                                                                Toast.makeText(
-                                                                    applicationContext,
-                                                                    "注册截至日期不存在，请先出库",
-                                                                    Toast.LENGTH_SHORT
-                                                                ).show()
+                                                                Toast.makeText(applicationContext, "注册截至日期不存在，请先出库", Toast.LENGTH_SHORT).show()
                                                             }
                                                         }
-
                                                     } else {
-                                                        Toast.makeText(
-                                                            applicationContext,
-                                                            "检测到多个设备，为避免误操作，请检查SN号",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
+                                                        Toast.makeText(applicationContext, "检测到多个设备，为避免误操作，请检查SN号", Toast.LENGTH_SHORT).show()
                                                         text3.text = ""
                                                     }
                                                 } else {
-                                                    Toast.makeText(
-                                                        applicationContext,
-                                                        "未查询到该SN号",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
+                                                    Toast.makeText(applicationContext, "未查询到该SN号", Toast.LENGTH_SHORT).show()
                                                     text3.text = ""
                                                 }
                                             } else {
-                                                Toast.makeText(
-                                                    applicationContext,
-                                                    "PageModel is null",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                                Toast.makeText(applicationContext, "PageModel is null", Toast.LENGTH_SHORT).show()
                                             }
                                         } else {
-                                            Toast.makeText(
-                                                applicationContext,
-                                                "Response body is null",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(applicationContext, "Response body is null", Toast.LENGTH_SHORT).show()
                                         }
                                     } else {
-                                        Toast.makeText(
-                                            applicationContext,
-                                            "Response not successful: ${response.code()}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(applicationContext, "Response not successful: ${response.code()}", Toast.LENGTH_SHORT).show()
                                     }
+                                    // ===== 结束原 onResponse 不变区 =====
                                 }
 
                                 override fun onFailure(p0: Call<registerinfo>, p1: Throwable) {
                                     p1.printStackTrace()
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "连接失败",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    Toast.makeText(applicationContext, "连接失败", Toast.LENGTH_SHORT).show()
                                 }
                             })
                     } else {
-                        Toast.makeText(applicationContext, "请先登录罗网", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(applicationContext, "请先登录罗网", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                // ===== 业务逻辑结束 =====
+
+                inputMethodManager.hideSoftInputFromWindow(it.windowToken, 0)
+            }
+            builder.setNegativeButton("取消") { dialog, which -> dialog.dismiss() }
+
+            val dialog = builder.create()
+
+            dialog.setOnShowListener {
+                val dp = resources.displayMetrics.density
+                val black = Color.parseColor("#111827")
+                val line = Color.parseColor("#E5E7EB")
+
+                // 背景：白底圆角 + 浅灰描边（和其它弹窗一致）
+                val bg = GradientDrawable().apply {
+                    cornerRadius = 12f * dp
+                    setColor(Color.WHITE)
+                    setStroke((1f * dp).toInt(), line)
+                }
+                dialog.window?.setBackgroundDrawable(bg)
+
+                // 宽度收窄：88% 屏宽，且不超过 320dp
+                val screenW = resources.displayMetrics.widthPixels
+                val targetW = min((screenW * 0.88f).toInt(), (320f * dp).toInt())
+                dialog.window?.setLayout(targetW, WindowManager.LayoutParams.WRAP_CONTENT)
+
+                val btnPos = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                val btnNeg = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+
+                // “确定” 黑底白字
+                btnPos?.let { btn ->
+                    btn.isAllCaps = false
+                    btn.textSize = 14f
+                    btn.setPadding((16 * dp).toInt(), (7 * dp).toInt(), (16 * dp).toInt(), (7 * dp).toInt())
+                    if (btn is MaterialButton) {
+                        btn.cornerRadius = (8f * dp).toInt()
+                        btn.strokeWidth = 0
+                        btn.backgroundTintList = ColorStateList.valueOf(black)
+                        btn.setTextColor(Color.WHITE)
+                    } else {
+                        btn.setTextColor(Color.WHITE)
+                        btn.background = GradientDrawable().apply {
+                            cornerRadius = 8f * dp
+                            setColor(black)
+                        }
                     }
                 }
 
-                // 隐藏虚拟键盘
-                inputMethodManager.hideSoftInputFromWindow(it.windowToken, 0)
+                // “取消” 白底黑字 + 浅灰描边
+                btnNeg?.let { btn ->
+                    btn.isAllCaps = false
+                    btn.textSize = 14f
+                    btn.setPadding((16 * dp).toInt(), (7 * dp).toInt(), (16 * dp).toInt(), (7 * dp).toInt())
+                    if (btn is MaterialButton) {
+                        btn.cornerRadius = (8f * dp).toInt()
+                        btn.strokeWidth = (1f * dp).toInt()
+                        btn.strokeColor = ColorStateList.valueOf(line)
+                        btn.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+                        btn.setTextColor(black)
+                    } else {
+                        btn.setTextColor(black)
+                        btn.background = GradientDrawable().apply {
+                            cornerRadius = 8f * dp
+                            setColor(Color.WHITE)
+                            setStroke((1f * dp).toInt(), line)
+                        }
+                    }
+                }
             }
-            builder.setNegativeButton("取消"){ dialog, which ->
-                dialog.dismiss()
-            }
-            val dialog = builder.create()
+
             dialog.show()
         }
         //注册信息按钮点击事件

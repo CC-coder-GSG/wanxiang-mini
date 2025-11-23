@@ -3,6 +3,7 @@ package com.example.appauto
 import android.app.appsearch.GetSchemaResponse
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.os.Bundle
 import android.os.Handler
@@ -10,6 +11,7 @@ import android.os.Looper
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
+import com.google.android.material.button.MaterialButton
 import android.widget.EditText
 import android.widget.ExpandableListView
 import android.widget.ListView
@@ -34,13 +36,19 @@ class Label : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_label)
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val button_care = findViewById<Button>(R.id.button_care)
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
             finish()
         }
 
@@ -49,7 +57,7 @@ class Label : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val button_ERP = findViewById<Button>(R.id.button_ERP)
+        val button_ERP = findViewById<MaterialButton>(R.id.button_ERP)
         val edit_ERP = findViewById<EditText>(R.id.editText_ERP)
         val listview = findViewById<ExpandableListView>(R.id.listview)
 
@@ -61,10 +69,10 @@ class Label : AppCompatActivity() {
         var childList = mutableListOf<List<String>>()
 
         button_ERP.setOnClickListener{
-            // 开始查询，禁用按钮，修改文字和颜色
+            // 开始查询：禁用按钮，仅用透明度表示加载，避免破坏 Material 样式
             button_ERP.isEnabled = false
             button_ERP.text = "查询中"
-            button_ERP.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+            button_ERP.alpha = 0.7f
 
             val runnable = Runnable {
 
@@ -116,10 +124,10 @@ class Label : AppCompatActivity() {
                         // 子线程调用 Toast
                         Looper.prepare()
                         handler.post {
-                            // 查询结束，恢复按钮状态
+                            // 查询结束，恢复按钮状态（不改背景）
                             button_ERP.isEnabled = true
                             button_ERP.text = "查询"
-                            button_ERP.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500))
+                            button_ERP.alpha = 1f
                         }
                         Toast.makeText(this, "未查询到", Toast.LENGTH_SHORT).show()
                         Looper.loop()
@@ -128,10 +136,10 @@ class Label : AppCompatActivity() {
                     Throwable.printStackTrace()
                 }finally{
                     handler.post {
-                        // 查询结束，恢复按钮状态
+                        // 查询结束，恢复按钮状态（不改背景）
                         button_ERP.isEnabled = true
                         button_ERP.text = "查询"
-                        button_ERP.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500))
+                        button_ERP.alpha = 1f
                     }
                 }
 

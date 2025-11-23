@@ -1,6 +1,8 @@
 package com.example.appauto
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.InputFilter
 import android.view.inputmethod.InputMethodManager
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
+import com.google.android.material.button.MaterialButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -31,6 +34,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import androidx.core.view.WindowCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.content.res.ColorStateList
 
 class RegisterSystem : AppCompatActivity() {
 
@@ -42,6 +48,11 @@ class RegisterSystem : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register_system)
+
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val button_out = findViewById<Button>(R.id.button_out)
@@ -55,7 +66,10 @@ class RegisterSystem : AppCompatActivity() {
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
         toolbar.setNavigationOnClickListener {
             finish()
         }
@@ -112,7 +126,7 @@ class RegisterSystem : AppCompatActivity() {
 
         //出库按钮点击事件
         button_out.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
+            val builder = MaterialAlertDialogBuilder(this)
             //设置对话框标题
             builder.setTitle("提示")
             //设置对话框消息
@@ -155,6 +169,39 @@ class RegisterSystem : AppCompatActivity() {
             }
             val dialog = builder.create()
             dialog.show()
+            // —— 统一高级风格：按钮与弹窗更协调 ——
+            val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+            // 确定：深色主按钮
+            positiveBtn.apply {
+                isAllCaps = false
+                setTextColor(Color.WHITE)
+                backgroundTintList = ColorStateList.valueOf(Color.parseColor("#111827"))
+                // 让按钮更像卡片内主操作（48dp，高级风格且不依赖 dimen 资源）
+                minHeight = (48 * resources.displayMetrics.density).toInt()
+                setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+
+                // 圆角与取消按钮保持一致（12dp）
+                (this as? MaterialButton)?.apply {
+                    cornerRadius = (12 * resources.displayMetrics.density).toInt()
+                }
+            }
+
+            // 取消：白色卡片式次按钮（带轻阴影）
+            negativeBtn.apply {
+                isAllCaps = false
+                setTextColor(Color.parseColor("#111827"))
+                backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+
+                // 若为 MaterialButton，可进一步设置描边/圆角/阴影
+                (this as? MaterialButton)?.apply {
+                    strokeColor = ColorStateList.valueOf(Color.parseColor("#E5E7EB"))
+                    strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                    cornerRadius = (12 * resources.displayMetrics.density).toInt()
+                    elevation = 2f * resources.displayMetrics.density
+                }
+            }
         }
         //永久码下发按钮点击事件
         button_permanentRegCode.setOnClickListener {
@@ -220,24 +267,34 @@ class RegisterSystem : AppCompatActivity() {
 
         //功能授权按钮点击事件
         button_funtion.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
-            // 设置对话框标题
-            builder.setTitle("功能授权")
-
-            // 创建一个包含两个开关的视图
+            // 创建一个包含两个开关 + 底部取消/确定按钮的视图（布局内按钮）
             val view = layoutInflater.inflate(R.layout.dialog_function_authorization, null)
             val switch1 = view.findViewById<SwitchCompat>(R.id.switch1)
             val switch2 = view.findViewById<SwitchCompat>(R.id.switch2)
+
             if (isNtrip) {
-                switch1.setChecked(true)
+                switch1.isChecked = true
             }
             if (isHostNet) {
-                switch2.setChecked(true)
+                switch2.isChecked = true
             }
-            builder.setView(view)
 
-            // 设置“确定”按钮
-            builder.setPositiveButton("确定") { dialog, which ->
+            val dialog = AlertDialog.Builder(this)
+                .setView(view)
+                .create()
+
+            // 去掉系统默认标题/按钮背景，让内容卡片风格更干净
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            // 绑定布局内按钮（新样式）
+            val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancel)
+            val btnConfirm = view.findViewById<MaterialButton>(R.id.btnConfirm)
+
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            btnConfirm.setOnClickListener {
                 val isSwitch1Checked = switch1.isChecked
                 val isSwitch2Checked = switch2.isChecked
 
@@ -291,16 +348,12 @@ class RegisterSystem : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-
                 })
-            }
 
-            // 设置“取消”按钮
-            builder.setNegativeButton("取消") { dialog, which ->
+                // 点击确定后关闭弹窗（逻辑无变化）
                 dialog.dismiss()
             }
 
-            val dialog = builder.create()
             dialog.show()
         }
 
@@ -408,6 +461,7 @@ class RegisterSystem : AppCompatActivity() {
 
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("选择日期")
+                .setTheme(R.style.ThemeOverlay_APPAuto_MaterialDatePicker)
                 .setSelection(today)
                 .setCalendarConstraints(calendarConstraintsBuilder.build())
                 .build()

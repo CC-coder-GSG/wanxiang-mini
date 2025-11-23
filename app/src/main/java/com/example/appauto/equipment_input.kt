@@ -25,6 +25,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -33,6 +34,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
+import android.app.AlertDialog
+import android.content.res.ColorStateList
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class equipment_input : AppCompatActivity() {
     private lateinit var dbHelper: DBManager
@@ -46,6 +50,11 @@ class equipment_input : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_equipment_input)
+
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         //录入按钮定义
@@ -85,7 +94,10 @@ class equipment_input : AppCompatActivity() {
         }
 
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
         toolbar.setNavigationOnClickListener {
             finish()
         }
@@ -217,18 +229,23 @@ class equipment_input : AppCompatActivity() {
                         p0: Call<equipment_input_callback>,
                         p1: Response<equipment_input_callback>
                     ) {
-                        val builder = android.app.AlertDialog.Builder(this@equipment_input)
-                        // 设置对话框的标题
-                        builder.setTitle("提示")
-                        // 设置对话框的消息内容
-                        builder.setMessage(p1.body()?.message)
-                        // 设置对话框的确认按钮
-                        builder.setPositiveButton("确定") { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        // 创建并显示对话框
-                        val dialog = builder.create()
+                        val dialog = MaterialAlertDialogBuilder(this@equipment_input)
+                            .setTitle("提示")
+                            .setMessage(p1.body()?.message)
+                            .setPositiveButton("确定") { d, _ -> d.dismiss() }
+                            .create()
+
                         dialog.show()
+
+                        // —— 统一高级风格：深色主按钮 ——
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                            isAllCaps = false
+                            setTextColor(Color.WHITE)
+                            backgroundTintList = ColorStateList.valueOf(Color.parseColor("#111827"))
+                            // 圆角与全局一致（12dp），若不是 MaterialButton 则忽略
+                            (this as? com.google.android.material.button.MaterialButton)?.cornerRadius =
+                                (12 * resources.displayMetrics.density).toInt()
+                        }
                     }
 
                     override fun onFailure(p0: Call<equipment_input_callback>, p1: Throwable) {

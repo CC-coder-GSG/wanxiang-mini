@@ -2,6 +2,7 @@ package com.example.appauto
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -22,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -34,6 +36,11 @@ class ListviewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_label)
+
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val button_ERP = findViewById<Button>(R.id.button_ERP)
@@ -60,7 +67,7 @@ class ListviewActivity : AppCompatActivity() {
             // 开始查询，禁用按钮，修改文字和颜色
             button_ERP.isEnabled = false
             button_ERP.text = "查询中"
-            button_ERP.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+            button_ERP.alpha = 0.7f
 
             val runnable = Runnable {
 
@@ -115,7 +122,7 @@ class ListviewActivity : AppCompatActivity() {
                             // 查询结束，恢复按钮状态
                             button_ERP.isEnabled = true
                             button_ERP.text = "查询"
-                            button_ERP.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500))
+                            button_ERP.alpha = 1f
                         }
 
                         Toast.makeText(this, "未查询到", Toast.LENGTH_SHORT).show()
@@ -128,7 +135,7 @@ class ListviewActivity : AppCompatActivity() {
                         // 查询结束，恢复按钮状态
                         button_ERP.isEnabled = true
                         button_ERP.text = "查询"
-                        button_ERP.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500))
+                        button_ERP.alpha = 1f
                     }
                 }
 

@@ -1,5 +1,6 @@
 package com.example.appauto
 
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -15,12 +16,19 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import androidx.core.view.WindowCompat
 
 class lwaccount : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_lwaccount)
+
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)

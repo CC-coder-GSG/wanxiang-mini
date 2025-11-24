@@ -58,6 +58,12 @@ class FirstActivity : AppCompatActivity() {
             startActivity(intent4)
         }
 
+        val button_account_cors = findViewById<Button>(R.id.button_account_cors)
+        button_account_cors.setOnClickListener {
+            val intent5 = Intent(this, account_of_cors::class.java)
+            startActivity(intent5)
+        }
+
     }
     /*
         override fun onCreateOptionsMenu(menu: Menu?): Boolean {

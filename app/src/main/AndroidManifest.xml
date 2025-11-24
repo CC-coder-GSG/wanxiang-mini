@@ -26,6 +26,9 @@
         android:theme="@style/Theme.APPAuto"
         tools:targetApi="31">
         <activity
+            android:name=".account_of_cors"
+            android:exported="false" />
+        <activity
             android:name=".RegisterSystem"
             android:exported="false" />
         <activity

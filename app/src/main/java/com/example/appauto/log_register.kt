@@ -1,5 +1,6 @@
 package com.example.appauto
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 
 class log_register : AppCompatActivity() {
@@ -21,11 +23,20 @@ class log_register : AppCompatActivity() {
         setContentView(R.layout.activity_log_register)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
             finish()
         }
+
         dbHelper = DBManager(this)
         dbHelper.openDatabase()
         val listview = findViewById<ListView>(R.id.listview)

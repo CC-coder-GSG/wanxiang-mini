@@ -2,6 +2,7 @@ package com.example.appauto
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,6 +32,11 @@ class kuaqu : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_kuaqu)
 
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val text = findViewById<TextView>(R.id.editText_kq)
         val text_kq = findViewById<TextView>(R.id.textView)
@@ -44,8 +51,11 @@ class kuaqu : AppCompatActivity() {
         val db = dbHelper.database
 
         setSupportActionBar(toolbar)
-        toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-        toolbar.setNavigationOnClickListener{
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
             finish()
         }
 

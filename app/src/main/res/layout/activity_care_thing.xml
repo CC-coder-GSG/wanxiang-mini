@@ -1,39 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F6F7FB"
     android:clipToPadding="true"
-    android:fitsSystemWindows="true"
-    android:layout_height="match_parent">
+    android:fitsSystemWindows="true">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:fitsSystemWindows="true"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
+        android:background="#111827"
+        android:elevation="4dp"
+        android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:background="#6200EE"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="提示"
-        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-    </androidx.appcompat.widget.Toolbar>
+        app:titleTextColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:layout_gravity="center"
-        android:id="@+id/bz_txt"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_width="350dp"
-        android:layout_height="match_parent"
-        android:textSize="20sp"
-        android:singleLine="false"
-        android:ellipsize="none"
-        android:maxLines="5"
-        android:inputType="textMultiLine"
-        android:hint="SN号规则：\n产品系列代号+第一位数字+板卡模块代号+功能代号+预留位+流水号\n例如：L51L02598(注意定制主机用客户产品系列代号)\nK803系列模块代号为1；
-\n功能代号规则：\n主机带数传功能，标识位使用数传标识，其中Lora版本为L，传统电台为U，华信电台为H；\n若不带数传，带惯导功能，标识位为0；\n若不带数传，且不带惯导，标识位为N；
-\n流水号0001-2000为研发号段使用，其他顺延\n另海外版本铭牌标贴带惯导功能的主机打IMU，不带惯导功能的不打其他标识
-\nT300 Plus和T30换U70模块的暂时先T31U9开始，待海外宣传后改回原规则" />
+    <!-- 内容卡片，承托长文本 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="3dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:overScrollMode="never">
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/bz_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textSize="15sp"
+                android:textColor="#111827"
+                android:lineSpacingExtra="4dp"
+                android:singleLine="false"
+                android:ellipsize="none"
+                android:maxLines="999"
+                android:inputType="textMultiLine"
+                android:hint="SN号规则：&#10;产品系列代号+第一位数字+板卡模块代号+功能代号+预留位+流水号&#10;例如：L51L02598(注意定制主机用客户产品系列代号)&#10;K803系列模块代号为1；&#10;&#10;功能代号规则：&#10;主机带数传功能，标识位使用数传标识，其中Lora版本为L，传统电台为U，华信电台为H；&#10;若不带数传，带惯导功能，标识位为0；&#10;若不带数传，且不带惯导，标识位为N；&#10;&#10;流水号0001-2000为研发号段使用，其他顺延&#10;另海外版本铭牌标贴带惯导功能的主机打IMU，不带惯导功能的不打其他标识&#10;&#10;T300 Plus和T30换U70模块的暂时先T31U9开始，待海外宣传后改回原规则" />
+
+        </ScrollView>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

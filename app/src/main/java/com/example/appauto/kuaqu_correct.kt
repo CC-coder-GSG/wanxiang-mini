@@ -1,5 +1,9 @@
 package com.example.appauto
 
+import android.content.res.ColorStateList
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -14,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,6 +32,11 @@ class kuaqu_correct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_kuaqu_correct)
+
+        // 设置状态栏为深色，和 Toolbar 保持一致
+        window.statusBarColor = Color.parseColor("#111827")
+        // 使用浅色状态栏图标（白色），避免深色背景下看不清
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         val text_correct = findViewById<TextView>(R.id.textView4)
@@ -68,11 +78,14 @@ class kuaqu_correct : AppCompatActivity() {
             }
         }
 
-                setSupportActionBar(toolbar)
-                toolbar.setNavigationIcon(com.google.android.material.R.drawable.ic_arrow_back_black_24)
-                toolbar.setNavigationOnClickListener {
-                    finish()
-                }
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // 让返回箭头/三点菜单在深色背景上可见
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.overflowIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
                 //获取到id值
                 val id = intent.getIntExtra("id", 0)
                 val auth = intent.getStringExtra("auth")
@@ -150,7 +163,7 @@ class kuaqu_correct : AppCompatActivity() {
                 switch.setOnClickListener {
                     if (switch.isChecked == true) {
                         //弹出提示框
-                        AlertDialog.Builder(this)
+                        val dialog = MaterialAlertDialogBuilder(this)
                             .setTitle("确认")
                             .setMessage("确认开启跨区？")
                             .setPositiveButton("确认") { dialog, which ->
@@ -193,11 +206,14 @@ class kuaqu_correct : AppCompatActivity() {
                                 // 回退点击 switch 的操作
                                 switch.isChecked = false
                             }
-                            .show()
+                            .create()
+
+                        dialog.show()
+                        styleDialog(dialog)
 
                     } else if (switch.isChecked == false) {
                         //弹出提示框
-                        AlertDialog.Builder(this)
+                        val dialog = MaterialAlertDialogBuilder(this)
                             .setTitle("确认")
                             .setMessage("确认关闭跨区？")
                             .setPositiveButton("确认") { dialog, which ->
@@ -241,12 +257,15 @@ class kuaqu_correct : AppCompatActivity() {
                                 // 回退点击 switch 的操作
                                 switch.isChecked = true
                             }
-                            .show()
+                            .create()
+
+                        dialog.show()
+                        styleDialog(dialog)
                     }
                 }
 
                 basestation.setOnClickListener {
-                    AlertDialog.Builder(this)
+                    val dialog = MaterialAlertDialogBuilder(this)
                         .setTitle("确认")
                         .setMessage("确认更改基站为$base_selected_item？")
                         .setPositiveButton("确认") { dialog, which ->
@@ -266,14 +285,12 @@ class kuaqu_correct : AppCompatActivity() {
                                     val message = p1.body()
                                     if (message != null) {
                                         println(p1.toString())
-                                        if (message != null) {
-                                            Toast.makeText(
-                                                applicationContext,
-                                                message.message,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            recreate()
-                                        }
+                                        Toast.makeText(
+                                            applicationContext,
+                                            message.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        recreate()
                                     }
                                     else{
                                         Toast.makeText(
@@ -297,13 +314,14 @@ class kuaqu_correct : AppCompatActivity() {
 
                             })
                         }
-                        .setNegativeButton("取消") { dialog, which ->
+                        .setNegativeButton("取消") { dialog, which -> }
+                        .create()
 
-                        }
-                        .show()
+                    dialog.show()
+                    styleDialog(dialog)
                 }
                 button_delete.setOnClickListener {
-                    val builder = AlertDialog.Builder(this)
+                    val builder = MaterialAlertDialogBuilder(this)
                     //设置对话框标题
                     builder.setTitle("提示")
                     //设置对话框消息
@@ -342,7 +360,32 @@ class kuaqu_correct : AppCompatActivity() {
                     }
                     val dialog = builder.create()
                     dialog.show()
+                    styleDialog(dialog)
                 }
             }
         }
 
+
+    private fun styleDialog(dialog: AlertDialog) {
+        // 确定按钮：深色主按钮
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+            isAllCaps = false
+            setTextColor(Color.WHITE)
+            backgroundTintList = ColorStateList.valueOf(Color.parseColor("#111827"))
+            (this as? com.google.android.material.button.MaterialButton)?.cornerRadius =
+                (12 * resources.displayMetrics.density).toInt()
+        }
+
+        // 取消按钮：白色卡片次按钮
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
+            isAllCaps = false
+            setTextColor(Color.parseColor("#111827"))
+            backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+            (this as? com.google.android.material.button.MaterialButton)?.apply {
+                strokeColor = ColorStateList.valueOf(Color.parseColor("#E5E7EB"))
+                strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                cornerRadius = (12 * resources.displayMetrics.density).toInt()
+                elevation = 2f * resources.displayMetrics.density
+            }
+        }
+    }

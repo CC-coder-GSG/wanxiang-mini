@@ -460,3 +460,128 @@ public interface tempRegDeadline_f{
     )
     fun tempRegDeadline_send(@Body tempRegDeadlined: tempRegDeadline_send, @Header("Authorization")auth : String) : Call<Trial_back>
 }
+
+// 获取软件注册码的新接口
+public interface new_software_create{
+    @POST("/gateway/mr/redemption/batchGen")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "userId: ",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "Accept: application/json, text/plain, */*",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+        "Connection: keep-alive",
+        "Content-Length:267",
+        "Content-Type: application/json;charset=UTF-8",
+        "Origin: https://cloud.sinognss.com",
+        "Priority: u=3, i",
+        "Referer: https://cloud.sinognss.com/meaReg/",
+        "Sec-Fetch-Dest: empty",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Site: same-origin",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+    )
+    fun new_software_create(@Body newsoftwareIO: new_software_code_get, @Header("Authorization") auth : String): Call<code_back>
+}
+
+//查询账号的接口
+public interface cors_account_get{
+    @POST("/gateway/BaseUser/userInfo/list")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "userId: ",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "Accept: application/json, text/plain, */*",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+        "Connection: keep-alive",
+        "Content-Length:267",
+        "Content-Type: application/json;charset=UTF-8",
+        "Origin: https://cloud.sinognss.com",
+        "Priority: u=3, i",
+        "Referer: https://cloud.sinognss.com/meaReg/",
+        "Sec-Fetch-Dest: empty",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Site: same-origin",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+    )
+    fun cors_account_get(@Body cors_account_get: AccountOfCorsGet, @Header("Authorization") auth : String):Call<CorsInformation>
+}
+
+//查询差分账号的密码接口
+public interface cors_account_password_check{
+    @POST("/gateway/BaseUser/userInfo/checkPass")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "userId: ",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "Accept: application/json, text/plain, */*",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+        "Connection: keep-alive",
+        "Content-Length:267",
+        "Content-Type: application/json;charset=UTF-8",
+        "Origin: https://cloud.sinognss.com",
+        "Priority: u=3, i",
+        "Referer: https://cloud.sinognss.com/meaReg/",
+        "Sec-Fetch-Dest: empty",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Site: same-origin",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+    )
+    fun password_check(@Body password_check: PasswordCheck, @Header("Authorization") auth : String):Call<Password>
+}
+
+//重置密码的接口
+public interface cors_password_reset{
+    @POST("/gateway/BaseUser/userInfo/resetPass")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "userId: ",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "Accept: application/json, text/plain, */*",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+        "Connection: keep-alive",
+        "Content-Length:267",
+        "Content-Type: application/json;charset=UTF-8",
+        "Origin: https://cloud.sinognss.com",
+        "Priority: u=3, i",
+        "Referer: https://cloud.sinognss.com/meaReg/",
+        "Sec-Fetch-Dest: empty",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Site: same-origin",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+    )
+    fun password_correct(@Body password_correct: PasswordCheck, @Header("Authorization") auth : String):Call<PasswordReset>
+}
+
+//自定义密码的接口
+public interface cors_password_custom{
+    @POST("/gateway/BaseUser/userInfo/customPass")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "userId: ",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "Accept: application/json, text/plain, */*",
+        "Accept-Encoding: gzip, deflate, br",
+        "Accept-Language: zh-CN,zh-Hans;q=0.9",
+        "Connection: keep-alive",
+        "Content-Length:267",
+        "Content-Type: application/json;charset=UTF-8",
+        "Origin: https://cloud.sinognss.com",
+        "Priority: u=3, i",
+        "Referer: https://cloud.sinognss.com/meaReg/",
+        "Sec-Fetch-Dest: empty",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Site: same-origin",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+    )
+    fun password_custom(@Body password_custom: PasswordCustom, @Header("Authorization") auth : String):Call<PasswordReset>
+}

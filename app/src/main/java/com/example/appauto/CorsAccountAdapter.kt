@@ -9,6 +9,11 @@ import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageButton
 
 class CorsAccountAdapter(
     private val onViewPwd: (RecordCors) -> Unit,
@@ -72,6 +77,7 @@ class CorsAccountAdapter(
         val visible = visibleSet.contains(id)
         h.tvPassword.text = if (visible) (passwordMap[id] ?: "********") else "********"
         h.btnViewPwd.text = if (visible) "隐藏" else "查看"
+        h.btnPwdCopy.visibility = if (visible) View.VISIBLE else View.GONE
 
         // 状态映射
         h.tvAccountStatus.text = if (record.accountStatus == 0) "启用" else "其他"
@@ -92,6 +98,14 @@ class CorsAccountAdapter(
         h.btnViewPwd.setOnClickListener { onViewPwd(record) }
         h.btnResetPwd.setOnClickListener { onResetPwd(record) }
         h.btnCustomPwd.setOnClickListener { onCustomPwd(record) }
+        h.btnPwdCopy.setOnClickListener {
+            val pwd = h.tvPassword.text?.toString().orEmpty()
+            if (pwd.isNotBlank() && pwd != "********") {
+                val cm = h.itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("cors_password", pwd))
+                Toast.makeText(h.itemView.context, "密码已复制", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun getItemCount(): Int = items.size
@@ -153,5 +167,6 @@ class CorsAccountAdapter(
         val btnViewPwd: MaterialButton = v.findViewById(R.id.btn_pwd_view)
         val btnResetPwd: MaterialButton = v.findViewById(R.id.btn_pwd_reset)
         val btnCustomPwd: MaterialButton = v.findViewById(R.id.btn_pwd_custom)
+        val btnPwdCopy: AppCompatImageButton = v.findViewById(R.id.btn_pwd_copy)
     }
 }

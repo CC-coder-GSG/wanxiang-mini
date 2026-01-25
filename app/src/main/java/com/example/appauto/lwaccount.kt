@@ -56,16 +56,24 @@ class lwaccount : AppCompatActivity() {
 
         val buttton_acc = findViewById<Button>(R.id.button_acc)
         buttton_acc.setOnClickListener{
+            // 先进入“登陆中”状态
             buttton_acc.isEnabled = false
             buttton_acc.text = "登陆中"
             buttton_acc.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
 
-            val acc = text_acc.text
-            val pss = text_pss.text
-            if (acc.isNullOrBlank() || pss.isNullOrBlank()) {
-                Toast.makeText(this, "请输入账号或密码", Toast.LENGTH_SHORT).show()
+            fun resetLoginButton() {
+                buttton_acc.isEnabled = true
+                buttton_acc.text = "登陆"
+                buttton_acc.setBackgroundColor(Color.parseColor("#111827"))
             }
-            else {
+
+            val acc = text_acc.text?.toString()?.trim().orEmpty()
+            val pss = text_pss.text?.toString()?.trim().orEmpty()
+            if (acc.isBlank() || pss.isBlank()) {
+                Toast.makeText(this, "请输入账号或密码", Toast.LENGTH_SHORT).show()
+                resetLoginButton()
+                return@setOnClickListener
+            } else {
                 val sql1 = "UPDATE luowang SET acc='$acc',pss='$pss' WHERE user=\"345\""
                 db.execSQL(sql1)
 
@@ -88,7 +96,12 @@ class lwaccount : AppCompatActivity() {
                                 call: Call<logindata>, response: Response<logindata>
                             ) {
                                 val list = response.body()
-                                if (list?.message == "操作成功") {
+                                if (!response.isSuccessful || list == null) {
+                                    resetLoginButton()
+                                    Toast.makeText(applicationContext, "登录失败", Toast.LENGTH_SHORT).show()
+                                    return
+                                }
+                                if (list.message == "操作成功") {
                                     val access_token = list.data.access_token
                                     Toast.makeText(
                                         applicationContext,
@@ -104,22 +117,18 @@ class lwaccount : AppCompatActivity() {
                                     finish()
                                 }
                                 else{
-                                    buttton_acc.isEnabled = true
-                                    buttton_acc.text = "登陆"
-                                    buttton_acc.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.purple_500))
+                                    resetLoginButton()
                                     Toast.makeText(
-                                    applicationContext,
-                                    list?.message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                        applicationContext,
+                                        list.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
 
                             override fun onFailure(p0: Call<logindata>, p1: Throwable) {
                                 p1.printStackTrace()
-                                buttton_acc.isEnabled = true
-                                buttton_acc.text = "登陆"
-                                buttton_acc.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.purple_500))
+                                resetLoginButton()
                                 Toast.makeText(
                                     applicationContext,
                                     "用户名或密码错误，输入错误5次后账号将锁定",
@@ -133,9 +142,7 @@ class lwaccount : AppCompatActivity() {
                     /*db.close()
                 dbHelper.closeDatabase()*/
                 } else {
-                    buttton_acc.isEnabled = true
-                    buttton_acc.text = "登陆"
-                    buttton_acc.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_500))
+                    resetLoginButton()
                     Toast.makeText(this, "未配表", Toast.LENGTH_SHORT).show()
                     db.close()
                     dataresult.close()

@@ -64,6 +64,12 @@ class FirstActivity : AppCompatActivity() {
             startActivity(intent5)
         }
 
+        val button_rtk_connect = findViewById<Button>(R.id.button_rtk_connect)
+        button_rtk_connect.setOnClickListener {
+            val intent6 = Intent(this, RtkConnectActivity::class.java)
+            startActivity(intent6)
+        }
+
     }
     /*
         override fun onCreateOptionsMenu(menu: Menu?): Boolean {

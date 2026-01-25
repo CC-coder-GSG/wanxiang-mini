@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.appauto"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.core)
     implementation(files("../lib/mysql-connector-java-5.1.46.jar"))
+    implementation(libs.androidx.lifecycle.runtime.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,5 +58,6 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     implementation(libs.material)
     implementation(libs.core)
+    implementation(files("libs/sino-rtkclient-release-1.1.0.aar"))
 
 }

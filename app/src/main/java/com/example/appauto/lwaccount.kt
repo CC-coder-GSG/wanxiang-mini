@@ -82,9 +82,10 @@ class lwaccount : AppCompatActivity() {
                         val retrofit = Retrofit.Builder().baseUrl("https://cloud.sinognss.com/")
                             .addConverterFactory(GsonConverterFactory.create()).build()
                         val login = retrofit.create(loginService::class.java)
+                        val encryptedPss = RSAEncryptor.encrypt(pss)
                         login.login(
                             acc,
-                            pss,
+                            encryptedPss,
                             "password",
                             "NaviCloud",
                             "NaviCloud_Secret",

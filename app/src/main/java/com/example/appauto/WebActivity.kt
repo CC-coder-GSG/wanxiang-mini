@@ -1,55 +1,92 @@
 package com.example.appauto
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
+import android.webkit.WebResourceError
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ScrollingView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import kotlin.concurrent.thread
-
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 
 class WebActivity : AppCompatActivity() {
+    private lateinit var webView: WebView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var errorText: TextView
+    private lateinit var toolbar: Toolbar
+
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.webactivity)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.responseText)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        thread{
-            try {
-                //创建okhttp实例
-                val client = OkHttpClient()
-                //发起请求
-                val request = Request.Builder().url("https://cloud.sinognss.com/cm/#/deviceManage").build()
-                //请求返回数据
-                val response = client.newCall(request).execute()
-                val responseData = response.body?.string()
-                if (responseData != null) {
-                    showResponse(responseData)
+
+        window.statusBarColor = Color.parseColor("#111827")
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
+        toolbar = findViewById(R.id.toolbarWeb)
+        progressBar = findViewById(R.id.progressWeb)
+        errorText = findViewById(R.id.textWebError)
+        webView = findViewById(R.id.webViewOfficial)
+
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.navigationIcon?.setTint(Color.WHITE)
+        toolbar.setNavigationOnClickListener { finish() }
+
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
+        webView.settings.loadsImagesAutomatically = true
+        webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                progressBar.progress = newProgress
+                progressBar.visibility = if (newProgress >= 100) View.GONE else View.VISIBLE
+                if (newProgress > 15) {
+                    errorText.visibility = View.GONE
                 }
             }
-            catch (e:Exception){
-                e.printStackTrace()
+        }
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageCommitVisible(view: WebView?, url: String?) {
+                progressBar.visibility = View.GONE
+                toolbar.title = view?.title?.takeIf { it.isNotBlank() } ?: "司南官网"
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                return false
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                if (request?.isForMainFrame == true) {
+                    progressBar.visibility = View.GONE
+                    errorText.visibility = View.VISIBLE
+                    errorText.text = "页面加载失败：${error?.description ?: "未知错误"}"
+                }
             }
         }
-        }
-    private fun showResponse(response: String){
-        val resTe = findViewById<TextView>(R.id.responseText)
-        runOnUiThread{
-            resTe.text = response
-        }
+
+        webView.loadUrl("https://www.sinognss.com")
     }
+
+    override fun onDestroy() {
+        webView.stopLoading()
+        webView.webChromeClient = WebChromeClient()
+        webView.webViewClient = WebViewClient()
+        webView.destroy()
+        super.onDestroy()
     }
+}

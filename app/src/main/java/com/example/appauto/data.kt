@@ -212,28 +212,28 @@ data class DevRegInfo(
 
 data class id_info(
     val code: Int,
-    val `data`: Data_id,
+    val `data`: Data_id?,
     val message: String,
     val type: Int
 )
 
 data class Data_id(
-    val accountType: String,
-    val createTime: Long,
-    val creatorName: String,
-    val deviceType: String,
-    val duration: Int,
-    val expireTime: Long,
-    val id: Int,
-    val isFarm: Boolean,
-    val isSpan: Boolean,
-    val online: Boolean,
-    val remainingTime: Int,
-    val remark: String,
-    val salesName: String,
-    val sn: String,
-    val status: Int,
-    val users: Any
+    val accountType: String?,
+    val createTime: Long?,
+    val creatorName: String?,
+    val deviceType: String?,
+    val duration: Int?,
+    val expireTime: Long?,
+    val id: Int?,
+    val isFarm: Boolean?,
+    val isSpan: Boolean?,
+    val online: Boolean?,
+    val remainingTime: Int?,
+    val remark: String?,
+    val salesName: String?,
+    val sn: String?,
+    val status: Int?,
+    val users: Any?
 )
 
 data class direct_more_message(
@@ -359,6 +359,11 @@ data class delete_equipment_callback(
     val `data`: Any,
     val message: String,
     val type: Int
+)
+
+data class renew_device_callback(
+    val code: Int,
+    val message: String
 )
 
 //出库返回值

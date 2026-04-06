@@ -323,6 +323,32 @@ public interface equipment_delete{
     fun delete_equipment(@Query("sn")SN: String, @Header("Authorization") auth : String) : Call<delete_equipment_callback>
 }
 
+public interface renew_device_by_duration{
+    @POST("gateway/DiffPlat/device/expireTime/updateByDur")
+    @Headers(
+        "Host: cloud.sinognss.com",
+        "Connection: keep-alive",
+        "sec-ch-ua-platform: \"Windows\"",
+        "sec-ch-ua: \"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\"",
+        "sec-ch-ua-mobile:?0",
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "Accept: application/json, text/plain, */*",
+        "Sec-Fetch-Site: same-origin",
+        "userId: ",
+        "Sec-Fetch-Mode: cors",
+        "Sec-Fetch-Dest: empty",
+        "Origin: https://cloud.sinognss.com",
+        "Referer: https://cloud.sinognss.com/cm/",
+        "Accept-Encoding: gzip, deflate, br, zstd",
+        "Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+    )
+    fun renew_device(
+        @Query("sn") SN: String,
+        @Query("duration") duration: Int,
+        @Header("Authorization") auth: String
+    ): Call<renew_device_callback>
+}
+
 //出库接口
 public interface out{
     @PUT("gateway/dr/deviceRegInfo/updateTrialStatus")

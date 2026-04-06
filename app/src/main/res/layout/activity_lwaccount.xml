@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:hint="输入罗网密码（密文）"
+                android:hint="输入罗网密码"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
@@ -96,7 +96,7 @@
                     android:padding="12dp"
                     android:textColor="#111827"
                     android:textSize="15sp"
-                    android:hint="输入罗网密码（密文）" />
+                    android:hint="输入罗网密码" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

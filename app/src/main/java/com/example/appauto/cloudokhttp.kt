@@ -585,3 +585,18 @@ public interface cors_password_custom{
     )
     fun password_custom(@Body password_custom: PasswordCustom, @Header("Authorization") auth : String):Call<PasswordReset>
 }
+
+// 诊断工具接口
+public interface DiagnosticService {
+    @POST("/gateway/BaseUser/userInfo/userDiago")
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    fun getDiag(@Body req: DiagRequest, @Header("Authorization") auth: String): Call<DiagResponse>
+
+    @POST("/gateway/BaseUser/userInfo/usageDetail")
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    fun getUsageDetail(@Body req: UsageDetailRequest, @Header("Authorization") auth: String): Call<UsageDetailResponse>
+
+    @POST("/gateway/BaseUser/userInfo/warnPage")
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    fun getWarnPage(@Body req: WarnPageRequest, @Header("Authorization") auth: String): Call<WarnPageResponse>
+}

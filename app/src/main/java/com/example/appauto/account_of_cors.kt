@@ -345,7 +345,14 @@ class account_of_cors : AppCompatActivity() {
         adapter = CorsAccountAdapter(
             onViewPwd = { item -> handleViewPwd(item) },
             onResetPwd = { item -> handleResetPwd(item) },
-            onCustomPwd = { item -> handleCustomPwd(item) }
+            onCustomPwd = { item -> handleCustomPwd(item) },
+            onDiagnostic = { item ->
+                val intent = android.content.Intent(this, DiagnosticActivity::class.java).apply {
+                    putExtra(DiagnosticActivity.EXTRA_ID, item.id)
+                    putExtra(DiagnosticActivity.EXTRA_NAME, item.name)
+                }
+                startActivity(intent)
+            }
         )
 
         // 三个点图标白色（防止黑底看不见）

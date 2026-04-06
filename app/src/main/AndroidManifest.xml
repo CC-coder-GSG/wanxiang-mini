@@ -84,6 +84,9 @@
             android:name=".SecondActivity"
             android:exported="true" />
         <activity
+            android:name=".DiagnosticActivity"
+            android:exported="false" />
+        <activity
             android:name=".RtkConnectActivity"
             android:exported="true">
             <intent-filter>

@@ -18,7 +18,8 @@ import androidx.appcompat.widget.AppCompatImageButton
 class CorsAccountAdapter(
     private val onViewPwd: (RecordCors) -> Unit,
     private val onResetPwd: (RecordCors) -> Unit,
-    private val onCustomPwd: (RecordCors) -> Unit
+    private val onCustomPwd: (RecordCors) -> Unit,
+    private val onDiagnostic: (RecordCors) -> Unit = {}
 ) : RecyclerView.Adapter<CorsAccountAdapter.VH>() {
 
     private val items = mutableListOf<RecordCors>()
@@ -98,6 +99,7 @@ class CorsAccountAdapter(
         h.btnViewPwd.setOnClickListener { onViewPwd(record) }
         h.btnResetPwd.setOnClickListener { onResetPwd(record) }
         h.btnCustomPwd.setOnClickListener { onCustomPwd(record) }
+        h.btnDiagnostic.setOnClickListener { onDiagnostic(record) }
         h.btnPwdCopy.setOnClickListener {
             val pwd = h.tvPassword.text?.toString().orEmpty()
             if (pwd.isNotBlank() && pwd != "********") {
@@ -167,6 +169,7 @@ class CorsAccountAdapter(
         val btnViewPwd: MaterialButton = v.findViewById(R.id.btn_pwd_view)
         val btnResetPwd: MaterialButton = v.findViewById(R.id.btn_pwd_reset)
         val btnCustomPwd: MaterialButton = v.findViewById(R.id.btn_pwd_custom)
+        val btnDiagnostic: MaterialButton = v.findViewById(R.id.btn_diagnostic)
         val btnPwdCopy: AppCompatImageButton = v.findViewById(R.id.btn_pwd_copy)
     }
 }

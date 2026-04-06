@@ -186,6 +186,27 @@
                         app:cornerRadius="8dp"
                         app:backgroundTint="#111827"
                         app:strokeWidth="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_diagnostic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:insetLeft="0dp"
+                        android:insetRight="0dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp"
+                        android:minWidth="64dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="诊断"
+                        android:textSize="12sp"
+                        android:textColor="#111827"
+                        app:cornerRadius="8dp"
+                        app:backgroundTint="#F3F4F6"
+                        app:strokeColor="#D1D5DB"
+                        app:strokeWidth="1dp" />
                 </LinearLayout>
 
             </LinearLayout>

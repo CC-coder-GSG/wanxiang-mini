@@ -581,3 +581,62 @@ data class PasswordCustom(
     val password: String
 )
 //自定义密码返回数据->跟重置密码的返回数据一样
+
+// ===================== 诊断工具相关数据模型 =====================
+
+// userDiago 请求
+data class DiagRequest(val id: Int, val name: String)
+
+// userDiago 响应
+data class DiagResponse(val code: Int, val data: DiagData?, val message: String, val type: Int? = null)
+data class DiagData(val basic: DiagBasic?, val latest: DiagLatest?)
+data class DiagBasic(val name: String?, val status: Int?, val expiredate: Long?)
+data class DiagLatest(
+    val online: Boolean?,
+    val lastloadtime: Long?,
+    val lastunloadtime: Long?,
+    val type: Int?,           // 0=Ntrip 1=Tcp
+    val mountPoint: String?,
+    val ggaTime: Long?,
+    val boradCastTime: Long?,
+    val state: Int?           // 0=未定位 1=单点 2=伪距差分 4=固定解 5=浮点解
+)
+
+// usageDetail 请求
+data class UsageDetailRequest(val id: Int, val name: String, val st: Long, val et: Long)
+
+// usageDetail 响应
+data class UsageDetailResponse(val code: Int, val data: UsageDetailData?, val message: String, val type: Int? = null)
+data class UsageDetailData(
+    val useInfo: UseInfo?,
+    val statusList: List<StatusSegment>?,
+    val stateList: List<StatePoint>?
+)
+data class UseInfo(
+    val onlineTime: Double?,
+    val avgDelay: Double?,
+    val avgSatNum: Double?,
+    val ggaCount: Int?,
+    val invalidGga: Int?,
+    val fixed: String?,     // 已是百分比字符串，如 "90.9%"
+    val floated: String?,   // 已是百分比字符串，如 "9.1%"
+    val logIn: Int?,
+    val logOut: Int?
+)
+data class StatusSegment(val online: Boolean?, val timeLength: Double?, val startTime: Long?, val endTime: Long?)
+data class StatePoint(val createTime: Long?, val state: Int?, val satNum: Int?, val delay: Double?)
+
+// warnPage 请求
+data class WarnPageRequest(val id: Int, val name: String, val st: Long, val et: Long, val current: Int, val size: Int)
+
+// warnPage 响应
+data class WarnPageResponse(val code: Int, val data: WarnPageData?, val message: String, val type: Int? = null)
+data class WarnPageData(val records: List<WarnRecord>?, val total: Int?, val pages: Int?)
+data class WarnRecord(
+    val createTime: Long?,
+    val event: String?,       // 中文事件名，如 "用户上线"
+    val ip: String?,
+    val port: Int?,
+    val mountPoint: String?,
+    val content: String?
+)

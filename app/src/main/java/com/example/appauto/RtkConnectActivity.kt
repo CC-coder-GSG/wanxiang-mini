@@ -2,289 +2,133 @@ package com.example.appauto
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.RadioGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import rtk.RtkManager
-import java.util.Locale
+import rtk.RtkState
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-
-private fun rtkStatusText(anyState: Any): String {
-    // Prefer numeric status codes (stable). Fall back to toString() only if we can't extract a code.
-    fun extractCode(v: Any): Int? {
-        return when (v) {
-            is Int -> v
-            is Number -> v.toInt()
-            else -> {
-                // Try common field/property names via reflection (no kotlin-reflect dependency)
-                val candidates = listOf("code", "status", "value")
-                for (name in candidates) {
-                    try {
-                        val f = v.javaClass.getDeclaredField(name)
-                        f.isAccessible = true
-                        val fv = f.get(v)
-                        when (fv) {
-                            is Int -> return fv
-                            is Number -> return fv.toInt()
-                        }
-                    } catch (_: Throwable) {
-                    }
-                }
-                // Last resort: parse an int from toString()
-                Regex("-?\\d+").find(v.toString())?.value?.toIntOrNull()
-            }
-        }
-    }
-
-    val code = extractCode(anyState)
-    if (code == null) {
-        return anyState.toString()
-    }
-
-    // SDK doc status code mapping
-    return when (code) {
-        // GNSS / GGA
-        -101 -> "📡 搜星中（-101）"
-        -102 -> "⚠️ 板卡未输出GGA（-102）"
-
-        // NTRIP / RTCM
-        200 -> "✅ NTRIP连接成功（200）"
-        201 -> "⛔ NTRIP已断开（201）"
-        -201 -> "❌ 账号或密码错误（-201）"
-        -202 -> "⏱️ NTRIP连接超时（-202）"
-        -203 -> "⏱️ NTRIP通讯超时（-203）"
-        -204 -> "🌐 无法连接至服务器（-204）"
-        -205 -> "❌ 挂载点不存在（-205）"
-        -206 -> "⚠️ NTRIP参数为空（-206）"
-
-        // Permission
-        -305 -> "🚫 没有串口读取权限（-305）"
-
-        else -> {
-            if (code < 0) {
-                String.format(Locale.getDefault(), "❌ 连接异常（%d）", code)
-            } else {
-                String.format(Locale.getDefault(), "ℹ️ 状态码：%d", code)
-            }
-        }
-    }
-}
-
-private fun rtkStatusTextForUi(anyState: Any): String = rtkStatusText(anyState)
-
-private const val RTK_PREFS = "rtk_connect_prefs"
-private const val KEY_HOST = "host"
-private const val KEY_PORT = "port"
-private const val KEY_USER = "user"
-private const val KEY_PWD = "pwd"
-private const val KEY_MOUNT = "mount"
-private const val KEY_COMMID = "commidType" // 0 internal, 1 bluetooth
-private const val KEY_BT_NAME = "btName"
-private const val KEY_BT_MAC = "btMac"
+import java.util.Locale
 
 class RtkConnectActivity : AppCompatActivity() {
+
+    // UI 控件
+    private lateinit var tvStatus: TextView
+    private lateinit var tvLog: TextView
+    private lateinit var tilMount: TextInputLayout
+
+    private lateinit var etHost: TextInputEditText
+    private lateinit var etPort: TextInputEditText
+    private lateinit var etUser: TextInputEditText
+    private lateinit var etPwd: TextInputEditText
+    private lateinit var etMount: TextInputEditText
+    private lateinit var etBtName: TextInputEditText
+    private lateinit var etBtMac: TextInputEditText
+
+    private lateinit var btnConnect: MaterialButton
+    private lateinit var btnDisconnect: MaterialButton
+    private lateinit var btnPickBt: MaterialButton
+
+    private lateinit var tvGgaRaw: TextView
+    private lateinit var tvGgaTime: TextView
+    private lateinit var tvGgaLatLon: TextView
+    private lateinit var tvGgaFix: TextView
+    private lateinit var tvGgaSat: TextView
+    private lateinit var tvGgaHdop: TextView
+    private lateinit var tvGgaAlt: TextView
+
+    private val RTK_PREFS = "rtk_connect_prefs"
+    private val tsFmt = DateTimeFormatter.ofPattern("HH:mm:ss.SSS", Locale.getDefault())
+
+    // --- 双状态显示变量 ---
+    private var btStatusStr = "未连接"
+    private var ntripStatusStr = "未启动"
+    private var isBtConnected = false
+    private var isNtripOk = false // 差分是否有数据
+
+    // 健康监测
+    private var lastGgaInfo: GgaInfo? = null
+    private var lastDataTime: Long = 0
+    private var isMonitoring = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rtk_connect)
 
+        initViews()
+        restoreParams()
+        setupListeners()
+        observeRtkData()
+
+        // 初始化显示
+        updateStatusDisplay()
+    }
+
+    private fun initViews() {
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        val tvStatus = findViewById<TextView>(R.id.tv_status)
-        val tvLog = findViewById<TextView>(R.id.tv_log)
-        val tvGga = findViewById<TextView>(R.id.tv_gga)
-        val btnClearLog = findViewById<MaterialButton>(R.id.btn_clear_log)
+        tvStatus = findViewById(R.id.tv_status)
+        tvLog = findViewById(R.id.tv_log)
 
-        val tvGgaTime = findViewById<TextView>(R.id.tv_gga_time)
-        val tvGgaLatLon = findViewById<TextView>(R.id.tv_gga_latlon)
-        val tvGgaFix = findViewById<TextView>(R.id.tv_gga_fix)
-        val tvGgaSat = findViewById<TextView>(R.id.tv_gga_sat)
-        val tvGgaHdop = findViewById<TextView>(R.id.tv_gga_hdop)
-        val tvGgaAlt = findViewById<TextView>(R.id.tv_gga_alt)
+        tvGgaRaw = findViewById(R.id.tv_gga)
+        tvGgaTime = findViewById(R.id.tv_gga_time)
+        tvGgaLatLon = findViewById(R.id.tv_gga_latlon)
+        tvGgaFix = findViewById(R.id.tv_gga_fix)
+        tvGgaSat = findViewById(R.id.tv_gga_sat)
+        tvGgaHdop = findViewById(R.id.tv_gga_hdop)
+        tvGgaAlt = findViewById(R.id.tv_gga_alt)
 
-        val btnConnect = findViewById<MaterialButton>(R.id.btn_connect)
-        val btnDisconnect = findViewById<MaterialButton>(R.id.btn_disconnect)
+        etHost = findViewById(R.id.et_host)
+        etPort = findViewById(R.id.et_port)
+        etUser = findViewById(R.id.et_user)
+        etPwd = findViewById(R.id.et_pwd)
+        tilMount = findViewById(R.id.til_mount)
+        etMount = findViewById(R.id.et_mount)
+        etBtName = findViewById(R.id.et_bt_name)
+        etBtMac = findViewById(R.id.et_bt_mac)
 
-        val etHost = findViewById<TextInputEditText>(R.id.et_host)
-        val etPort = findViewById<TextInputEditText>(R.id.et_port)
-        val etUser = findViewById<TextInputEditText>(R.id.et_user)
-        val etPwd = findViewById<TextInputEditText>(R.id.et_pwd)
-        val etMount = findViewById<TextInputEditText>(R.id.et_mount)
+        btnConnect = findViewById(R.id.btn_connect)
+        btnDisconnect = findViewById(R.id.btn_disconnect)
+        btnPickBt = findViewById(R.id.btn_pick_bt)
 
-        val rgComm = findViewById<RadioGroup>(R.id.rg_comm)
-        val rbInternal = findViewById<MaterialRadioButton>(R.id.rb_internal)
-        val rbBluetooth = findViewById<MaterialRadioButton>(R.id.rb_bluetooth)
-
-        val btnPickBt = findViewById<MaterialButton>(R.id.btn_pick_bt)
-        val tilBtName = findViewById<TextInputLayout>(R.id.til_bt_name)
-        val tilBtMac = findViewById<TextInputLayout>(R.id.til_bt_mac)
-        val etBtName = findViewById<TextInputEditText>(R.id.et_bt_name)
-        val etBtMac = findViewById<TextInputEditText>(R.id.et_bt_mac)
-
-        val prefs = getSharedPreferences(RTK_PREFS, MODE_PRIVATE)
-
-        // Restore inputs
-        etHost.setText(prefs.getString(KEY_HOST, "").orEmpty())
-        val savedPort = prefs.getInt(KEY_PORT, 2101)
-        etPort.setText(String.format(Locale.getDefault(), "%d", savedPort))
-        etUser.setText(prefs.getString(KEY_USER, "").orEmpty())
-        etPwd.setText(prefs.getString(KEY_PWD, "").orEmpty())
-        etMount.setText(prefs.getString(KEY_MOUNT, "").orEmpty())
-
-        val savedComm = prefs.getInt(KEY_COMMID, 0)
-        if (savedComm == 1) rbBluetooth.isChecked = true else rbInternal.isChecked = true
-
-        etBtName.setText(prefs.getString(KEY_BT_NAME, "").orEmpty())
-        etBtMac.setText(prefs.getString(KEY_BT_MAC, "").orEmpty())
-
-        fun updateBtUiVisible() {
-            val isBt = rbBluetooth.isChecked
-            tilBtName.visibility = if (isBt) View.VISIBLE else View.GONE
-            tilBtMac.visibility = if (isBt) View.VISIBLE else View.GONE
-            btnPickBt.visibility = if (isBt) View.VISIBLE else View.GONE
+        findViewById<MaterialButton>(R.id.btn_clear_log).setOnClickListener {
+            tvLog.text = ""
+            tvGgaRaw.text = "(等待数据...)"
+            resetCardUi()
         }
-        updateBtUiVisible()
+    }
 
-        rgComm.setOnCheckedChangeListener { _, _ ->
-            updateBtUiVisible()
-        }
+    private fun resetCardUi() {
+        tvGgaTime.text = "UTC时间：-"
+        tvGgaLatLon.text = "经纬度：-"
+        tvGgaFix.text = "解状态：-"
+        tvGgaSat.text = "卫星数：-"
+        tvGgaHdop.text = "HDOP：-"
+        tvGgaAlt.text = "海拔：-"
+    }
 
-        val inputFields = listOf(etHost, etPort, etUser, etPwd, etMount, etBtName, etBtMac)
-
-        fun applyUiState(anyState: Any) {
-            val raw = anyState.toString()
-            val code = Regex("-?\\d+").find(raw)?.value?.toIntOrNull()
-
-            val isConnecting = raw.contains("Connecting", ignoreCase = true)
-
-            // Prefer numeric status codes; keep a best-effort string fallback for non-numeric states.
-            val isConnected = (code == 200) || raw.contains("Connected", ignoreCase = true)
-            val isDisconnected = (code == 201) || raw.contains("Disconnected", ignoreCase = true)
-            val isIdle = raw.contains("Idle", ignoreCase = true)
-
-            // Allow editing when idle OR disconnected OR any negative error code.
-            // Note: don't repeat `isDisconnected` because it would be redundant if `isIdle` already includes it.
-            val allowEdit = isIdle || isDisconnected || (code != null && code < 0)
-
-            inputFields.forEach { it.isEnabled = allowEdit }
-            for (i in 0 until rgComm.childCount) {
-                rgComm.getChildAt(i).isEnabled = allowEdit
-            }
-            btnPickBt.isEnabled = allowEdit
-
-            btnConnect.isEnabled = !isConnecting && !isConnected
-            btnDisconnect.isEnabled = !allowEdit
-            btnConnect.text = if (isConnecting) "连接中…" else "连接"
-        }
-
-        applyUiState("Idle")
-
-        val tsFmt = DateTimeFormatter.ofPattern("HH:mm:ss.SSS", Locale.getDefault())
-
-        fun appendLog(line: String) {
-            val ts = LocalTime.now().format(tsFmt)
-            val out = "[$ts] $line"
-
-            // Trim to avoid TextView growing unbounded
-            if (tvLog.text.length > 12000) {
-                tvLog.text = tvLog.text.takeLast(6000)
-            }
-            tvLog.append(out)
-            tvLog.append("\n")
-        }
-
-        fun ggaFixText(q: Int): String = when (q) {
-            0 -> "无效"
-            1 -> "单点"
-            2 -> "DGPS"
-            4 -> "RTK固定"
-            5 -> "RTK浮点"
-            6 -> "估算"
-            else -> "未知($q)"
-        }
-
-        fun parseUtc(hhmmss: String): String {
-            if (hhmmss.length < 6) return "-"
-            val h = hhmmss.substring(0, 2)
-            val m = hhmmss.substring(2, 4)
-            val s = hhmmss.substring(4)
-            return "$h:$m:$s"
-        }
-
-        fun nmeaToDegree(v: String, hemi: String): Double? {
-            if (v.isBlank()) return null
-            val dot = v.indexOf('.')
-            if (dot < 0) return null
-            // lat: ddmm.mmmm, lon: dddmm.mmmm -> infer by digits before dot
-            val degLen = if (dot > 4) 3 else 2
-            if (v.length < degLen) return null
-            val deg = v.substring(0, degLen).toDoubleOrNull() ?: return null
-            val min = v.substring(degLen).toDoubleOrNull() ?: return null
-            var out = deg + (min / 60.0)
-            val h = hemi.uppercase(Locale.getDefault())
-            if (h == "S" || h == "W") out = -out
-            return out
-        }
-
-        data class GgaInfo(
-            val utc: String,
-            val lat: Double?,
-            val lon: Double?,
-            val fixQ: Int,
-            val sats: Int?,
-            val hdop: Double?,
-            val alt: Double?,
-            val altUnit: String
-        )
-
-        fun parseGga(line: String): GgaInfo? {
-            val core = line.substringBefore('*')
-            val parts = core.split(',')
-            if (parts.size < 11) return null
-            val utcRaw = parts.getOrNull(1).orEmpty()
-            val latRaw = parts.getOrNull(2).orEmpty()
-            val latH = parts.getOrNull(3).orEmpty()
-            val lonRaw = parts.getOrNull(4).orEmpty()
-            val lonH = parts.getOrNull(5).orEmpty()
-            val fixQ = parts.getOrNull(6)?.toIntOrNull() ?: -1
-            val sats = parts.getOrNull(7)?.toIntOrNull()
-            val hdop = parts.getOrNull(8)?.toDoubleOrNull()
-            val alt = parts.getOrNull(9)?.toDoubleOrNull()
-            val altUnit = parts.getOrNull(10).orEmpty().ifBlank { "M" }
-
-            return GgaInfo(
-                utc = parseUtc(utcRaw),
-                lat = nmeaToDegree(latRaw, latH),
-                lon = nmeaToDegree(lonRaw, lonH),
-                fixQ = fixQ,
-                sats = sats,
-                hdop = hdop,
-                alt = alt,
-                altUnit = altUnit
-            )
-        }
-
-        // Device picker page
+    private fun setupListeners() {
         val pickBtLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
             if (res.resultCode == RESULT_OK) {
-                val data = res.data
-                val name = data?.getStringExtra(BtDeviceSelectActivity.EXTRA_BT_NAME).orEmpty()
-                val mac = data?.getStringExtra(BtDeviceSelectActivity.EXTRA_BT_MAC).orEmpty()
+                val name = res.data?.getStringExtra("EXTRA_BT_NAME").orEmpty()
+                val mac = res.data?.getStringExtra("EXTRA_BT_MAC").orEmpty()
                 if (mac.isNotBlank()) {
                     etBtName.setText(name)
                     etBtMac.setText(mac)
@@ -293,55 +137,72 @@ class RtkConnectActivity : AppCompatActivity() {
         }
 
         btnPickBt.setOnClickListener {
-            rbBluetooth.isChecked = true
-            updateBtUiVisible()
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_SCAN) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT), 101)
+                    return@setOnClickListener
+                }
+            }
             pickBtLauncher.launch(Intent(this, BtDeviceSelectActivity::class.java))
         }
 
+        // 🟢【已修复】这里改为调用 NtripUtils (您之前创建的文件)
+        tilMount.setEndIconOnClickListener {
+            val host = etHost.text?.toString()?.trim().orEmpty()
+            val port = etPort.text?.toString()?.trim()?.toIntOrNull() ?: 2101
+            if (host.isBlank()) {
+                Toast.makeText(this, "请先填写 IP 地址", Toast.LENGTH_SHORT).show()
+                return@setEndIconOnClickListener
+            }
+            val loadingDialog = AlertDialog.Builder(this)
+                .setMessage("正在获取源列表...")
+                .setCancelable(false)
+                .create()
+            loadingDialog.show()
+
+            lifecycleScope.launch {
+                try {
+                    // 修正点：NtripHelper -> NtripUtils
+                    val list = NtripUtils.getNtripSourceTable(host, port)
+                    loadingDialog.dismiss()
+                    if (list.isEmpty()) {
+                        Toast.makeText(this@RtkConnectActivity, "未获取到挂载点", Toast.LENGTH_SHORT).show()
+                    } else {
+                        showMountPointSelector(list)
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Toast.makeText(this@RtkConnectActivity, getChineseError(e), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         btnConnect.setOnClickListener {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "请先授予蓝牙权限", Toast.LENGTH_SHORT).show()
+                    requestPermissions(arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT), 101)
+                    return@setOnClickListener
+                }
+            }
+
             val host = etHost.text?.toString().orEmpty().trim()
             val port = etPort.text?.toString()?.trim()?.toIntOrNull() ?: 0
             val user = etUser.text?.toString().orEmpty().trim()
             val pwd = etPwd.text?.toString().orEmpty()
             val mount = etMount.text?.toString().orEmpty().trim()
-
-            val commIdType = if (rbBluetooth.isChecked) 1 else 0
             val btName = etBtName.text?.toString().orEmpty().trim()
             val btMac = etBtMac.text?.toString().orEmpty().trim()
 
-            // Save params
-            prefs.edit()
-                .putString(KEY_HOST, host)
-                .putInt(KEY_PORT, port)
-                .putString(KEY_USER, user)
-                .putString(KEY_PWD, pwd)
-                .putString(KEY_MOUNT, mount)
-                .putInt(KEY_COMMID, commIdType)
-                .putString(KEY_BT_NAME, btName)
-                .putString(KEY_BT_MAC, btMac)
-                .apply()
+            if (host.isBlank() || mount.isBlank() || btMac.isBlank()) {
+                Toast.makeText(this, "⚠️ 参数不完整", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            if (host.isBlank() || port <= 0 || mount.isBlank()) {
-                tvStatus.text = "状态：⚠️ 请填写 Host / Port / MountPoint"
-                return@setOnClickListener
-            }
-            if (commIdType == 1 && btMac.isBlank()) {
-                tvStatus.text = "状态：⚠️ 请选择蓝牙设备（需要MAC）"
-                return@setOnClickListener
-            }
+            saveParams(host, port, user, pwd, mount, btName, btMac)
 
             lifecycleScope.launch(Dispatchers.IO) {
-                RtkManager.connect(
-                    context = this@RtkConnectActivity,
-                    host = host,
-                    port = port,
-                    user = user,
-                    pwd = pwd,
-                    mount = mount,
-                    commIdType = commIdType,
-                    btName = btName,
-                    btMac = btMac
-                )
+                RtkManager.connect(lifecycleScope,this@RtkConnectActivity, host, port, user, pwd, mount, btName, btMac)
             }
         }
 
@@ -350,55 +211,249 @@ class RtkConnectActivity : AppCompatActivity() {
                 RtkManager.disconnect()
             }
         }
+    }
 
-        btnClearLog.setOnClickListener {
-            tvLog.text = ""
-            tvGga.text = "(等待 GPGGA/GNGGA …)"
-            tvGgaTime.text = "UTC：-"
-            tvGgaLatLon.text = "坐标：-"
-            tvGgaFix.text = "定位：-"
-            tvGgaSat.text = "卫星：-"
-            tvGgaHdop.text = "HDOP：-"
-            tvGgaAlt.text = "高程：-"
+    private fun updateStatusDisplay() {
+        val text = "蓝牙: $btStatusStr  |  差分: $ntripStatusStr"
+        tvStatus.text = text
+
+        if (!isBtConnected) {
+            tvStatus.setTextColor(getColor(android.R.color.black))
+        } else {
+            if (isNtripOk) {
+                tvStatus.setTextColor(getColor(android.R.color.holo_green_dark))
+            } else {
+                tvStatus.setTextColor(getColor(android.R.color.holo_orange_dark))
+            }
         }
+    }
 
+    private fun observeRtkData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     RtkManager.state.collect { st ->
-                        tvStatus.text = "状态：${rtkStatusTextForUi(st)}"
                         applyUiState(st)
-                    }
-                }
-                launch {
-                    RtkManager.nmea.collect { msg ->
-                        val line = msg.trim()
 
-                        if (line.startsWith("\$GPGGA") || line.startsWith("\$GNGGA")) {
-                            tvGga.text = line
-
-                            val info = parseGga(line)
-                            if (info != null) {
-                                tvGgaTime.text = "UTC：${info.utc}"
-
-                                val latStr = info.lat?.let { String.format(Locale.getDefault(), "%.8f", it) } ?: "-"
-                                val lonStr = info.lon?.let { String.format(Locale.getDefault(), "%.8f", it) } ?: "-"
-                                tvGgaLatLon.text = "坐标：$latStr, $lonStr"
-
-                                tvGgaFix.text = "定位：${ggaFixText(info.fixQ)}"
-                                tvGgaSat.text = "卫星：${info.sats?.toString() ?: "-"}"
-                                tvGgaHdop.text = "HDOP：${info.hdop?.let { String.format(Locale.getDefault(), "%.2f", it) } ?: "-"}"
-                                tvGgaAlt.text = "高程：${info.alt?.let { String.format(Locale.getDefault(), "%.3f", it) } ?: "-"} ${info.altUnit}"
+                        when(st) {
+                            is RtkState.Idle -> {
+                                btStatusStr = "未连接"
+                                ntripStatusStr = "未启动"
+                                isBtConnected = false
+                                isNtripOk = false
+                                isMonitoring = false
+                            }
+                            is RtkState.Connecting -> {
+                                btStatusStr = "连接中..."
+                                isBtConnected = false
+                            }
+                            is RtkState.Connected -> {
+                                btStatusStr = "✅已连接"
+                                isBtConnected = true
+                                ntripStatusStr = "等待数据..."
+                                isNtripOk = false
+                                if (!isMonitoring) checkDataStreamHealth()
+                            }
+                            is RtkState.Error -> {
+                                if (st.code <= -100 || (st.code in -10..0)) {
+                                    ntripStatusStr = "❌${st.msg}"
+                                    isNtripOk = false
+                                } else {
+                                    btStatusStr = "❌失败"
+                                    isBtConnected = false
+                                }
                             }
                         }
+                        updateStatusDisplay()
+                    }
+                }
 
-                        // Append all NMEA lines to log with timestamp.
-                        if (line.isNotBlank()) {
+                launch {
+                    RtkManager.serverTraffic.collect { bytes ->
+                        lastDataTime = System.currentTimeMillis()
+                        if (!isNtripOk) {
+                            isNtripOk = true
+                        }
+                        ntripStatusStr = "✅服务正常"
+                        updateStatusDisplay()
+                    }
+                }
+
+                launch {
+                    RtkManager.nmea.collect { fullMsg ->
+                        val line = cleanNmeaMessage(fullMsg)
+                        if (line.contains("GGA")) {
+                            tvGgaRaw.text = line
+                            val ggaInfo = parseGga(line)
+                            if (ggaInfo != null) {
+                                lastGgaInfo = ggaInfo
+                                updateCardUi(ggaInfo)
+                            }
+                        }
+                        if (line.contains("GGA") || line.contains("RMC")) {
                             appendLog(line)
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun checkDataStreamHealth() {
+        isMonitoring = true
+        lastDataTime = System.currentTimeMillis()
+
+        lifecycleScope.launch {
+            while (isBtConnected && isMonitoring) {
+                kotlinx.coroutines.delay(2000)
+                val silence = System.currentTimeMillis() - lastDataTime
+                if (silence > 10000) {
+                    isNtripOk = false
+                    ntripStatusStr = "⚠️无数据(请检查挂载点)"
+                    updateStatusDisplay()
+                }
+            }
+        }
+    }
+
+    private fun getChineseError(e: Exception): String {
+        return when (e) {
+            is UnknownHostException -> "无法找到服务器 (IP地址错误)"
+            is ConnectException -> "连接被拒绝 (端口可能错了)"
+            is SocketTimeoutException -> "连接超时 (网络不通)"
+            else -> "获取失败: ${e.message}"
+        }
+    }
+
+    private fun updateCardUi(info: GgaInfo) {
+        tvGgaTime.text = "UTC时间：${info.utc}"
+        tvGgaLatLon.text = "经纬度：${info.lat}, ${info.lon}"
+
+        tvGgaFix.text = "解状态：${info.fixStatus}"
+        if (info.fixStatus.contains("固定")) {
+            tvGgaFix.setTextColor(getColor(android.R.color.holo_green_dark))
+        } else if (info.fixStatus.contains("浮点")) {
+            tvGgaFix.setTextColor(getColor(android.R.color.holo_orange_dark))
+        } else {
+            tvGgaFix.setTextColor(getColor(android.R.color.black))
+        }
+
+        tvGgaSat.text = "卫星数：${info.satCount}"
+        tvGgaHdop.text = "HDOP：${info.hdop}"
+        tvGgaAlt.text = "海拔：${info.alt} M"
+    }
+
+    data class GgaInfo(
+        val utc: String, val lat: String, val lon: String,
+        val fixStatus: String, val satCount: String, val hdop: String, val alt: String
+    )
+
+    private fun parseGga(nmea: String): GgaInfo? {
+        try {
+            val start = nmea.indexOf("$")
+            if (start == -1) return null
+            val raw = nmea.substring(start)
+            val parts = raw.split(",")
+            if (parts.size < 10) return null
+
+            val timeRaw = parts[1]
+            val timeStr = if (timeRaw.length >= 6) "${timeRaw.substring(0,2)}:${timeRaw.substring(2,4)}:${timeRaw.substring(4,6)}" else timeRaw
+
+            val latRaw = parts[2]
+            val latDir = parts[3]
+            val latVal = if (latRaw.isNotBlank()) "%.6f %s".format(nmeaToDegree(latRaw), latDir) else "-"
+
+            val lonRaw = parts[4]
+            val lonDir = parts[5]
+            val lonVal = if (lonRaw.isNotBlank()) "%.6f %s".format(nmeaToDegree(lonRaw), lonDir) else "-"
+
+            val fixQ = parts[6]
+            val fixStr = when(fixQ) {
+                "0" -> "无效解"
+                "1" -> "单点定位"
+                "2" -> "DGPS"
+                "4" -> "RTK 固定解 🔥"
+                "5" -> "RTK 浮点解 ⚠️"
+                else -> "未知 ($fixQ)"
+            }
+
+            return GgaInfo(timeStr, latVal, lonVal, fixStr, parts[7], parts[8], parts[9])
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    private fun nmeaToDegree(raw: String): Double {
+        return try {
+            val pointIndex = raw.indexOf('.')
+            if (pointIndex == -1) return 0.0
+            val degreeEndIndex = pointIndex - 2
+            val degrees = raw.substring(0, degreeEndIndex).toDouble()
+            val minutes = raw.substring(degreeEndIndex).toDouble()
+            degrees + minutes / 60.0
+        } catch (e: Exception) { 0.0 }
+    }
+
+    private fun cleanNmeaMessage(msg: String): String {
+        val key = "originalMessage="
+        val index = msg.indexOf(key)
+        if (index != -1) {
+            var clean = msg.substring(index + key.length)
+            if (clean.endsWith(")")) clean = clean.substring(0, clean.length - 1)
+            if (clean.endsWith("}")) clean = clean.substring(0, clean.length - 1)
+            return clean.trim()
+        }
+        return msg.trim()
+    }
+
+    private fun applyUiState(st: RtkState) {
+        val isIdle = st is RtkState.Idle
+        val isConnected = st is RtkState.Connected
+        etHost.isEnabled = isIdle
+        etPort.isEnabled = isIdle
+        etUser.isEnabled = isIdle
+        etPwd.isEnabled = isIdle
+        etMount.isEnabled = isIdle
+        btnPickBt.isEnabled = isIdle
+        btnConnect.isEnabled = isIdle
+        btnDisconnect.isEnabled = isConnected || st is RtkState.Error
+    }
+
+    private fun appendLog(line: String) {
+        if (line.isBlank()) return
+        val ts = LocalTime.now().format(tsFmt)
+        tvLog.append("[$ts] $line\n")
+        if (tvLog.text.length > 3000) tvLog.text = tvLog.text.takeLast(1500)
+    }
+
+    private fun saveParams(h: String, p: Int, u: String, pw: String, m: String, bn: String, ma: String) {
+        getSharedPreferences(RTK_PREFS, MODE_PRIVATE).edit()
+            .putString("host", h).putInt("port", p).putString("user", u)
+            .putString("pwd", pw).putString("mount", m).putString("btName", bn)
+            .putString("btMac", ma).apply()
+    }
+
+    private fun restoreParams() {
+        val prefs = getSharedPreferences(RTK_PREFS, MODE_PRIVATE)
+        etHost.setText(prefs.getString("host", ""))
+        etPort.setText(prefs.getInt("port", 2101).toString())
+        etUser.setText(prefs.getString("user", ""))
+        etPwd.setText(prefs.getString("pwd", ""))
+        etMount.setText(prefs.getString("mount", "AUTO"))
+        etBtName.setText(prefs.getString("btName", ""))
+        etBtMac.setText(prefs.getString("btMac", ""))
+    }
+
+    private fun showMountPointSelector(list: List<MountPointBean>) {
+        val items = list.map { "${it.name}   [${it.format}]\n${it.navSystem}" }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("选择挂载点 (${list.size}个)")
+            .setItems(items) { _, which ->
+                val selected = list[which]
+                etMount.setText(selected.name)
+                Toast.makeText(this, "已选择: ${selected.name}", Toast.LENGTH_SHORT).show()
+            }
+            .setPositiveButton("取消", null)
+            .show()
     }
 }

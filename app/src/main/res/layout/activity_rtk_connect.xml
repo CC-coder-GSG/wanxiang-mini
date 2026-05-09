@@ -34,7 +34,6 @@
             android:paddingTop="14dp"
             android:paddingBottom="20dp">
 
-            <!-- NTRIP 参数输入 -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:hint="Port（例如 2101）"
+                android:hint="Port端口"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusTopStart="14dp"
                 app:boxCornerRadiusTopEnd="14dp"
@@ -114,25 +113,26 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_mount"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:hint="MountPoint"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusTopStart="14dp"
-                app:boxCornerRadiusTopEnd="14dp"
-                app:boxCornerRadiusBottomStart="14dp"
-                app:boxCornerRadiusBottomEnd="14dp">
+                android:layout_marginTop="8dp"
+                android:hint="挂载点 (MountPoint)"
+                app:endIconMode="custom"
+                app:endIconDrawable="@android:drawable/ic_menu_search"
+                app:endIconContentDescription="搜索源列表"
+                app:endIconCheckable="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_mount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:minHeight="56dp" />
+                    android:inputType="textNoSuggestions"
+                    android:text="AUTO" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- 连接方式：内置板卡 / 蓝牙RTK -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -147,40 +147,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="连接方式"
+                        android:text="RTK 蓝牙设备"
                         android:textStyle="bold"
                         android:textSize="14sp"
                         android:textColor="#111827" />
-
-                    <RadioGroup
-                        android:id="@+id/rg_comm"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="6dp">
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rb_internal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="内置板卡"
-                            android:checked="true" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rb_bluetooth"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="18dp"
-                            android:text="蓝牙RTK" />
-                    </RadioGroup>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_pick_bt"
@@ -202,8 +177,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:visibility="gone"
-                        android:hint="蓝牙名称（自动填充/可修改）"
+                        android:hint="蓝牙名称"
                         app:boxBackgroundMode="outline"
                         app:boxCornerRadiusTopStart="14dp"
                         app:boxCornerRadiusTopEnd="14dp"
@@ -214,7 +188,8 @@
                             android:id="@+id/et_bt_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
+                            android:editable="false"
+                            android:focusable="false"
                             android:minHeight="56dp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -223,8 +198,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:visibility="gone"
-                        android:hint="蓝牙MAC地址（自动填充）"
+                        android:hint="MAC地址"
                         app:boxBackgroundMode="outline"
                         app:boxCornerRadiusTopStart="14dp"
                         app:boxCornerRadiusTopEnd="14dp"
@@ -235,35 +209,27 @@
                             android:id="@+id/et_bt_mac"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
+                            android:editable="false"
+                            android:focusable="false"
                             android:minHeight="56dp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 操作按钮 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_connect"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:minHeight="56dp"
-                android:paddingStart="18dp"
-                android:paddingEnd="18dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:gravity="center"
-                android:text="连接"
+                android:text="开始连接"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#111827"
-                android:backgroundTint="@android:color/white"
-                android:elevation="2dp"
-                app:cornerRadius="14dp"
-                app:strokeColor="#E5E7EB"
-                app:strokeWidth="1dp" />
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#111827"
+                app:cornerRadius="14dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_disconnect"
@@ -271,29 +237,26 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:minHeight="56dp"
-                android:text="断开"
+                android:text="断开连接"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#111827"
                 android:backgroundTint="@android:color/white"
-                android:elevation="2dp"
                 app:cornerRadius="14dp"
                 app:strokeColor="#E5E7EB"
                 app:strokeWidth="1dp" />
 
-            <!-- 状态 -->
             <TextView
                 android:id="@+id/tv_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:text="状态："
+                android:text="状态：未连接"
                 android:textColor="#111827"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <!-- GGA 预览 + 详细信息 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -301,123 +264,66 @@
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="14dp"
                 app:strokeColor="#E5E7EB"
-                app:strokeWidth="1dp"
-                app:cardElevation="1dp">
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp">
+                    android:padding="14dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="最近一条 GGA"
+                            android:text="定位信息"
                             android:textColor="#111827"
-                            android:textSize="13sp"
                             android:textStyle="bold" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_clear_log"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minHeight="36dp"
-                            android:minWidth="72dp"
-                            android:text="清空"
-                            android:textAllCaps="false"
-                            android:textColor="#111827"
-                            android:backgroundTint="@android:color/white"
-                            app:cornerRadius="10dp"
-                            app:strokeColor="#E5E7EB"
-                            app:strokeWidth="1dp" />
+                            android:text="清空日志"
+                            android:textSize="12sp" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tv_gga"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="(等待 GPGGA/GNGGA …)"
+                        android:layout_marginTop="4dp"
+                        android:text="(等待 GGA 报文...)"
                         android:textColor="#374151"
-                        android:textSize="12sp"
-                        android:typeface="monospace" />
+                        android:textSize="11sp"
+                        android:fontFamily="monospace" />
 
-                    <TextView
-                        android:id="@+id/tv_gga_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="UTC：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F3F4F6" android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
 
-                    <TextView
-                        android:id="@+id/tv_gga_latlon"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="坐标：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tv_gga_fix"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="定位：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tv_gga_sat"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="卫星：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tv_gga_hdop"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="HDOP：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tv_gga_alt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="高程：-"
-                        android:textColor="#111827"
-                        android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="UTC时间：-" android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_latlon" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="经纬度：-" android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_fix" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="解状态：-" android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_sat" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="卫星数：-" android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_hdop" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="HDOP：-" android:textSize="12sp" />
+                    <TextView android:id="@+id/tv_gga_alt" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="海拔：-" android:textSize="12sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- NMEA Log -->
             <TextView
                 android:id="@+id/tv_log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="#374151"
-                android:textSize="12sp"
-                android:lineSpacingExtra="2dp" />
+                android:textColor="#9CA3AF"
+                android:textSize="10sp" />
 
         </LinearLayout>
     </ScrollView>

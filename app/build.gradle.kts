@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     implementation(libs.material)
     implementation(libs.core)
-    implementation(files("libs/sino-rtkclient-release-1.1.0.aar"))
+    implementation(files("libs/sino-rtkclient-release-1.0.0.aar"))
+    implementation(libs.slf4j.api)
+    implementation(libs.slf4j.simple)
 
 }
